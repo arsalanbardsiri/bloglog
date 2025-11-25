@@ -1,105 +1,85 @@
+# Blog Lounge 🚀
 
-# Bloglog: Simple Blogging Platform
+> **A High-Scale Distributed Content Platform** designed to demonstrate Senior Engineering principles: Caching, Rate Limiting, Idempotency, and Microservices Architecture.
 
-## Description
-Bloglog is a web application that allows users to create, view, and interact with blog posts. Built using the MERN stack (MongoDB, Express.js, React, Node.js), it features GraphQL for data handling, JWT for secure authentication, and Stripe for optional donation functionality.
+![System Design](https://img.shields.io/badge/System%20Design-Distributed-blue)
+![Tech Stack](https://img.shields.io/badge/Tech-Next.js%20%7C%20Node.js%20%7C%20Redis%20%7C%20Postgres-black)
 
-```
-Bloglog/
-│
-├── .gitignore
-│
-├── README.md
-│   └── (Project description and setup instructions)
-│
-├── client/
-│   ├── package.json
-│   ├── public/
-│   │   └── vite.svg
-│   └── src/
-│       ├── App.jsx
-│       ├── assets
-│       │   ├── react.svg
-│       ├── components/
-│       │   ├── BlogPost.jsx
-│       │   ├── CommentSection.jsx
-│       │   ├── DonationButton.jsx
-│       │   ├── Footer.jsx
-│       │   ├── LoginForm.jsx
-│       │   ├── Navbar.jsx
-│       │   └── RegisterForm.jsx
-│       ├── main.jsx
-│       ├── pages/
-│       │   ├── About.jsx
-│       │   ├── Blog.jsx
-│       │   ├── Home.jsx
-│       │   └── Profile.jsx
-│       └── utils/
-│           ├── api.js
-│           ├── apolloClient.js
-│           ├── mutations.js
-│           ├── queries.js
-│           └── auth.js
-│
-└── server/
-    ├── config/
-    │   ├── authConfig.js
-    │   └── dbConfig.js
-    ├── controllers/
-    │   ├── commentController.js
-    │   ├── postController.js
-    │   ├── stripeController.js
-    │   └── userController.js
-    ├── models/
-    │   ├── Comment.js
-    │   ├── Post.js
-    │   └── User.js
-    ├── package.json
-    ├── routes/
-    │   ├── commentRoutes.js
-    │   ├── postRoutes.js
-    │   ├── stripeRoutes.js
-    │   └── userRoutes.js
-    ├── schemas/
-    │   ├── resolvers.js
-    │   └── typeDefs.js
-    ├── server.js
-    └── utils/
-        ├── auth.js
-        └── jwtAuth.js
+## 🏗️ System Architecture
+
+This project is not just a blog; it's a simulation of a production-grade distributed system.
+
+```mermaid
+graph TD
+    User[User Browser] -->|HTTPS| Client[Next.js Frontend (Vercel)]
+    Client -->|REST API| Server[Express Backend (Render)]
+    
+    subgraph "Data Layer"
+        Server -->|Read/Write| DB[(PostgreSQL)]
+        Server -->|Cache-Aside| Redis[(Redis Cache)]
+    end
+    
+    subgraph "External Services"
+        Server -->|Payments| Stripe[Stripe API]
+    end
 ```
 
-## Enhanced Features
-- **User Authentication**: Secure login and registration with JWT.
-- **CRUD Operations**: Users can manage blog posts (create, read, update, delete).
-- **Comments**: Interactive comment system for each post.
-- **Responsive Design**: Mobile-friendly and responsive user interface.
-- **Stripe Integration**: Option for users to make donations to bloggers.
-- **GraphQL API**: Efficient data fetching and mutations with GraphQL.
+## 🌟 Key Engineering Features
 
-## Technologies Used
-- React for front-end
-- Node.js and Express.js for back-end
-- MongoDB with Mongoose for database
-- GraphQL for API
-- JWT for Authentication
-- Stripe for donation processing
-- Heroku for deployment
+### 1. Distributed Caching (Redis)
+Implemented the **Cache-Aside Pattern** to minimize database load and reduce latency.
+- **Read**: Checks Redis first (`GET posts:all`). If miss, queries DB and sets cache (TTL: 5 mins).
+- **Write**: Invalidates cache on new post creation (`DEL posts:all`) to ensure consistency.
 
-## Installation and Setup
-1. Clone the repository.
-2. Install dependencies in both `client` and `server` directories.
-3. Set up required environment variables.
-4. Run `npm start` in both directories to start the application.
+### 2. Rate Limiting (DDoS Protection)
+Custom middleware using Redis to track request counts per IP.
+- **Algorithm**: Fixed Window Counter.
+- **Limit**: 100 requests / 15 minutes.
+- **Why**: Protects the API from abuse and ensures fair usage in a distributed environment.
 
-## Running the Application
-- The application will run on `localhost:3000` (client) and `localhost:4000` (server).
+### 3. Idempotency (Safe Payments)
+Middleware to prevent "Double Charge" issues in payment processing.
+- **Mechanism**: Clients send a unique `Idempotency-Key` header.
+- **Logic**: Server caches the response of successful requests in Redis. If the same key is received, the cached response is returned immediately without re-processing the payment.
 
-## Contributing
-Contributions are welcome. Please fork the repository and create a pull request for review.
+### 4. Containerization (DevOps)
+Full Docker support for local development, orchestrating:
+- **Backend**: Node.js 20 (Alpine)
+- **Database**: PostgreSQL 15
+- **Cache**: Redis (Alpine)
 
-## License
-This project is licensed under the MIT License.
+## 🛠️ Tech Stack
 
-<!-- ## Screenshots
-*Include screenshots of the application.* -->
+- **Frontend**: Next.js 14 (App Router), Tailwind CSS, Framer Motion.
+- **Backend**: Node.js, Express, TypeScript.
+- **Database**: PostgreSQL (via Prisma ORM).
+- **Infrastructure**: Docker, Docker Compose.
+
+## 🚀 Getting Started
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/blog-lounge.git
+   cd blog-lounge
+   ```
+
+2. **Start the environment**
+   ```bash
+   docker-compose up --build
+   ```
+
+3. **Access the application**
+   - Frontend: `http://localhost:3000`
+   - Backend: `http://localhost:4000`
+   - Studio (DB): `npx prisma studio`
+
+## 🧠 Engineering Decisions
+
+### Why PostgreSQL over MongoDB?
+While the original project used MongoDB, I migrated to **PostgreSQL** to demonstrate relational data modeling. Users, Posts, and Comments have strict relationships that are better enforced by SQL constraints, ensuring data integrity at scale.
+
+### Why Redis for Rate Limiting?
+In-memory storage is required for the speed of rate limiting checks. Redis allows this state to be shared across multiple backend instances (horizontal scaling), whereas local memory would fail in a distributed cluster.
+
+---
+*Built as a Portfolio Project for Senior Software Engineering roles.*
