@@ -2,24 +2,44 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 
 export default function LoginPage() {
-    const router = useRouter();
+    const { login } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState("");
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
+        setError("");
 
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+        const formData = new FormData(e.target as HTMLFormElement);
+        const email = formData.get("email") as string;
+        const password = formData.get("password") as string;
 
-        setIsLoading(false);
-        router.push("/");
+        try {
+            const res = await fetch("http://localhost:4000/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || "Login failed");
+            }
+
+            login(data.token, data.user);
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -32,10 +52,17 @@ export default function LoginPage() {
                 <h1 className="mb-2 text-2xl font-bold text-white">Welcome back</h1>
                 <p className="mb-6 text-zinc-400">Enter your credentials to access your account.</p>
 
+                {error && (
+                    <div className="mb-4 rounded-lg bg-red-500/10 p-3 text-sm text-red-500 border border-red-500/20">
+                        {error}
+                    </div>
+                )}
+
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <label className="mb-2 block text-sm font-medium text-zinc-300">Email</label>
                         <input
+                            name="email"
                             type="email"
                             required
                             className="w-full rounded-lg border border-white/10 bg-black/50 px-4 py-2 text-white focus:border-indigo-500 focus:outline-none"
@@ -45,6 +72,7 @@ export default function LoginPage() {
                     <div>
                         <label className="mb-2 block text-sm font-medium text-zinc-300">Password</label>
                         <input
+                            name="password"
                             type="password"
                             required
                             className="w-full rounded-lg border border-white/10 bg-black/50 px-4 py-2 text-white focus:border-indigo-500 focus:outline-none"
