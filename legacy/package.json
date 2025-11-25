@@ -1,0 +1,19 @@
+{
+  "name": "bloglog",
+  "version": "1.0.0",
+  "description": "## Description Bloglog is a web application that allows users to create, view, and interact with blog posts. Built using the MERN stack (MongoDB, Express.js, React, Node.js), it features GraphQL for data handling, JWT for secure authentication, and Stripe for optional donation functionality.",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "develop": "concurrently \"cd server && npm run watch\" \"cd client && npm run dev\"",
+    "install": "cd server && npm i && cd ../client && npm i",
+    "build": "cd client && npm install && npm run build",
+    "heroku-postbuild": "npm run build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

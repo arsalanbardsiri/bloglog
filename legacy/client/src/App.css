@@ -1,0 +1,85 @@
+/* App.css */
+.body-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%; /* Ensure full width */
+}
+
+.content-wrapper {
+  flex: 1; /* Ensure it takes up all available space */
+}
+
+/* Navbar Styles */
+.navbar {
+  background-image: linear-gradient(45deg, #64c4ff, #535bf2);
+  margin-bottom: 0; /* Remove margin to prevent space between nav and content */
+}
+
+.nav-link {
+  position: relative;
+  overflow: hidden; /* Ensures the pseudo-element is contained within the nav-link's bounds */
+  transition: color 0.2s, transform 0.2s;
+}
+
+.nav-link:hover {
+  transform: scale(1.05);
+  text-shadow: 0 0 8px #d2d3f35c;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px; /* Adjusted to be below the text */
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background-color: #747bff; /* Color of the underline */
+  transition: width 0.3s ease-in-out;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* Footer Styles */
+.footer {
+  background-image: linear-gradient(45deg, #64c4ff, #535bf2);
+  color: white; /* Change footer text color to white for contrast */
+  padding: 1rem 0; /* Padding for visual spacing */
+}
+
+/* Add the footer to stick to the bottom */
+.footer {
+  margin-top: auto;
+}
+
+/* Form and Button Styles */
+.form-input,
+.form-control {
+  border-radius: 0.25rem; /* Match bootstrap's default border-radius */
+  margin-bottom: 1rem;
+}
+
+.btn-primary,
+.button-primary {
+  background-color: #64c4ff;
+  border-color: #646cff;
+  color: white;
+}
+
+.btn-primary:hover,
+.button-primary:hover {
+  background-color: #64c4ff;
+  border-color: #535bf2;
+}
+
+/* General Styles */
+.text-center {
+  text-align: center;
+}
+
+/* Utility Styles */
+.mt-auto {
+  margin-top: auto;
+}
