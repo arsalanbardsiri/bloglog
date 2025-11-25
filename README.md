@@ -11,12 +11,12 @@ This project is not just a blog; it's a simulation of a production-grade distrib
 
 ```mermaid
 graph TD
-    User[User Browser] -->|HTTPS| Client[Next.js Frontend (Vercel)]
-    Client -->|REST API| Server[Express Backend (Render)]
+    User[User Browser] -->|HTTPS| Client["Next.js Frontend (Vercel)"]
+    Client -->|REST API| Server["Express Backend (Render)"]
     
     subgraph "Data Layer"
         Server -->|Read/Write| DB[(PostgreSQL)]
-        Server -->|Cache-Aside| Redis[(Redis Cache)]
+        Server -->|Cache-Aside| Redis["Redis Cache (Upstash)"]
     end
     
     subgraph "External Services"
