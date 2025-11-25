@@ -1,0 +1,51 @@
+"use client";
+
+import { motion } from "framer-motion";
+import Link from "next/link";
+
+export default function LoginPage() {
+    return (
+        <div className="container mx-auto flex min-h-[calc(100vh-4rem)] items-center justify-center px-4">
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="w-full max-w-md rounded-2xl border border-white/10 bg-zinc-900/50 p-8 backdrop-blur-xl"
+            >
+                <h1 className="mb-2 text-2xl font-bold text-white">Welcome back</h1>
+                <p className="mb-6 text-zinc-400">Enter your credentials to access your account.</p>
+
+                <form className="space-y-4">
+                    <div>
+                        <label className="mb-2 block text-sm font-medium text-zinc-300">Email</label>
+                        <input
+                            type="email"
+                            className="w-full rounded-lg border border-white/10 bg-black/50 px-4 py-2 text-white focus:border-indigo-500 focus:outline-none"
+                            placeholder="john@example.com"
+                        />
+                    </div>
+                    <div>
+                        <label className="mb-2 block text-sm font-medium text-zinc-300">Password</label>
+                        <input
+                            type="password"
+                            className="w-full rounded-lg border border-white/10 bg-black/50 px-4 py-2 text-white focus:border-indigo-500 focus:outline-none"
+                            placeholder="••••••••"
+                        />
+                    </div>
+                    <button
+                        type="button"
+                        className="w-full rounded-lg bg-white py-2 font-semibold text-black transition-colors hover:bg-zinc-200"
+                    >
+                        Log In
+                    </button>
+                </form>
+
+                <p className="mt-6 text-center text-sm text-zinc-500">
+                    Don't have an account?{" "}
+                    <Link href="/signup" className="text-indigo-400 hover:text-indigo-300">
+                        Sign up
+                    </Link>
+                </p>
+            </motion.div>
+        </div>
+    );
+}
