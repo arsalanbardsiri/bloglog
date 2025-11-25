@@ -1,9 +1,27 @@
 import { Router } from 'express';
-import { getPosts, createPost } from '../controllers/postController';
+import { getPosts, createPost, getMyPosts, votePost } from '../controllers/postController';
+import { getComments, createComment } from '../controllers/commentController';
+
+import { authMiddleware } from '../middleware/authMiddleware';
 
 const router = Router();
 
-router.get('/', getPosts);
-router.post('/', createPost);
+// Optional auth for getPosts to see "myVote"
+router.get('/', (req, res, next) => {
+    // Custom middleware to allow optional auth
+    const authHeader = req.headers.authorization;
+    if (authHeader) {
+        authMiddleware(req, res, next);
+    } else {
+        next();
+    }
+}, getPosts);
+router.get('/me', authMiddleware, getMyPosts);
+router.post('/', authMiddleware, createPost);
+router.post('/:id/vote', authMiddleware, votePost);
+
+// Comments
+router.get('/:id/comments', getComments);
+router.post('/:id/comments', authMiddleware, createComment);
 
 export default router;
