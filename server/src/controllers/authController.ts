@@ -46,6 +46,12 @@ export const register = async (req: Request, res: Response) => {
         // Generate Token
         const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
 
+        // Send Welcome Email (Async - don't await to avoid blocking response)
+        // In a real app, use a queue like BullMQ for this
+        import('../services/emailService').then(service => {
+            service.sendWelcomeEmail(user.email, user.username);
+        });
+
         res.status(201).json({
             token,
             user: { id: user.id, username: user.username, email: user.email },
