@@ -26,10 +26,12 @@ app.use(rateLimiter({
 
 import postRoutes from './routes/postRoutes';
 import stripeRoutes from './routes/stripeRoutes';
+import authRoutes from './routes/authRoutes';
 
 // Routes
 app.use('/api/posts', postRoutes);
 app.use('/api/stripe', stripeRoutes);
+app.use('/api/auth', authRoutes);
 
 app.get('/api/health', (req: Request, res: Response) => {
     res.status(200).json({ status: 'ok', message: 'Server is running' });
