@@ -7,6 +7,8 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { Plus, FileText, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { StickyNote } from "@/components/StickyNote";
+import { PaperModal } from "@/components/PaperModal";
 
 interface Post {
     id: string;
@@ -21,6 +23,7 @@ export default function DashboardPage() {
     const router = useRouter();
     const [posts, setPosts] = useState<Post[]>([]);
     const [loadingPosts, setLoadingPosts] = useState(true);
+    const [selectedPost, setSelectedPost] = useState<Post | null>(null);
 
     useEffect(() => {
         if (!isLoading && !token) {
@@ -65,20 +68,20 @@ export default function DashboardPage() {
                 className="mb-12 flex items-center justify-between"
             >
                 <div>
-                    <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-                    <p className="text-zinc-400">Welcome back, {user.username}</p>
+                    <h1 className="text-3xl font-handwriting font-bold text-stone-800">Dashboard</h1>
+                    <p className="text-stone-500 font-serif italic">Welcome back, {user.username}</p>
                 </div>
                 <div className="flex gap-4">
                     <button
                         onClick={logout}
-                        className="flex items-center gap-2 rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-zinc-400 hover:bg-white/5 hover:text-white"
+                        className="flex items-center gap-2 rounded-lg border border-stone-300 px-4 py-2 text-sm font-medium text-stone-500 hover:bg-stone-100 hover:text-stone-800 transition-colors"
                     >
                         <LogOut className="h-4 w-4" />
                         Log out
                     </button>
                     <Link
                         href="/dashboard/new"
-                        className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500"
+                        className="flex items-center gap-2 rounded-lg bg-stone-800 px-4 py-2 text-sm font-medium text-white hover:bg-stone-700 shadow-md transition-all hover:shadow-lg"
                     >
                         <Plus className="h-4 w-4" />
                         Create Post
@@ -88,72 +91,98 @@ export default function DashboardPage() {
 
             <div className="grid gap-6 md:grid-cols-3">
                 <div className="col-span-2 space-y-6">
-                    <h2 className="text-xl font-semibold text-white">Your Posts</h2>
+                    <h2 className="text-xl font-handwriting font-bold text-stone-700">Your Collection</h2>
 
                     {loadingPosts ? (
                         <div className="flex justify-center py-8">
-                            <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
+                            <div className="h-6 w-6 animate-spin rounded-full border-2 border-stone-400 border-t-transparent" />
                         </div>
                     ) : posts.length > 0 ? (
-                        posts.map((post) => (
-                            <motion.div
-                                key={post.id}
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                className="rounded-xl border border-white/10 bg-zinc-900/50 p-6 backdrop-blur-sm transition-colors hover:bg-zinc-900/80"
-                            >
-                                <div className="flex justify-between items-start mb-2">
-                                    <h3 className="text-lg font-semibold text-white">{post.title}</h3>
-                                    <span className={cn(
-                                        "text-sm font-bold px-2 py-1 rounded bg-white/5",
-                                        (post.score || 0) > 0 ? "text-orange-500" : "text-zinc-400"
-                                    )}>
-                                        {post.score || 0} pts
-                                    </span>
+                        <div className="grid gap-6 md:grid-cols-2">
+                            {posts.map((post, index) => (
+                                <div key={post.id} className="flex justify-center">
+                                    <StickyNote
+                                        title={post.title}
+                                        content={post.content}
+                                        date={new Date(post.createdAt).toLocaleDateString()}
+                                        color={["yellow", "blue", "green", "pink"][index % 4] as any}
+                                        rotation={Math.random() * 4 - 2}
+                                        onClick={() => setSelectedPost(post)}
+                                    />
                                 </div>
-                                <p className="mb-4 text-zinc-400 line-clamp-2">{post.content}</p>
-                                <p className="text-xs text-zinc-500">
-                                    Published on {new Date(post.createdAt).toLocaleDateString()}
-                                </p>
-                            </motion.div>
-                        ))
+                            ))}
+                        </div>
                     ) : (
-                        <div className="rounded-xl border border-white/10 bg-zinc-900/50 p-8 text-center backdrop-blur-sm">
-                            <FileText className="mx-auto mb-4 h-12 w-12 text-zinc-600" />
-                            <h3 className="mb-2 text-lg font-medium text-white">No posts yet</h3>
-                            <p className="mb-6 text-zinc-400">
-                                Share your thoughts with the community.
+                        <div className="rounded-xl border border-stone-200 bg-white/50 p-8 text-center backdrop-blur-sm">
+                            <FileText className="mx-auto mb-4 h-12 w-12 text-stone-400" />
+                            <h3 className="mb-2 text-lg font-medium text-stone-700">No notes yet</h3>
+                            <p className="mb-6 text-stone-500">
+                                Start your collection of thoughts.
                             </p>
                             <Link
                                 href="/dashboard/new"
-                                className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-medium text-black hover:bg-zinc-200"
+                                className="inline-flex items-center gap-2 rounded-lg bg-stone-800 px-4 py-2 text-sm font-medium text-white hover:bg-stone-700"
                             >
-                                Write your first post
+                                Write a note
                             </Link>
                         </div>
                     )}
                 </div>
 
                 <div className="space-y-6">
-                    <div className="rounded-xl border border-white/10 bg-zinc-900/50 p-6 backdrop-blur-sm">
-                        <h2 className="mb-4 text-lg font-semibold text-white">Profile</h2>
-                        <div className="space-y-4">
+                    <div className="rounded-xl border border-stone-200 bg-white/50 p-6 backdrop-blur-sm shadow-sm">
+                        <h2 className="mb-4 text-lg font-handwriting font-bold text-stone-800">Identity Card</h2>
+                        <div className="space-y-4 font-serif">
                             <div>
-                                <label className="text-xs font-medium text-zinc-500">Username</label>
-                                <p className="text-white">{user.username}</p>
+                                <label className="text-xs font-medium text-stone-500 uppercase tracking-wider">Username</label>
+                                <p className="text-stone-800 font-bold text-lg">{user.username}</p>
                             </div>
                             <div>
-                                <label className="text-xs font-medium text-zinc-500">Email</label>
-                                <p className="text-white">{user.email}</p>
+                                <label className="text-xs font-medium text-stone-500 uppercase tracking-wider">Email</label>
+                                <p className="text-stone-800">{user.email}</p>
                             </div>
                             <div>
-                                <label className="text-xs font-medium text-zinc-500">User ID</label>
-                                <p className="font-mono text-xs text-zinc-400">{user.id}</p>
+                                <label className="text-xs font-medium text-stone-500 uppercase tracking-wider">Member ID</label>
+                                <p className="font-mono text-xs text-stone-400">{user.id}</p>
                             </div>
+                        </div>
+                    </div>
+
+                    {/* Origami Decoration */}
+                    <div className="relative h-0">
+                        <div className="absolute -right-8 -bottom-8 w-32 h-32 z-10 pointer-events-none opacity-90 rotate-6">
+                            <img
+                                src="/assets/origami/plane.png"
+                                alt="Origami Plane"
+                                className="w-full h-full object-contain drop-shadow-md mix-blend-multiply"
+                            />
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+
+            <PaperModal
+                isOpen={!!selectedPost}
+                onClose={() => setSelectedPost(null)}
+                title={selectedPost?.title || ""}
+            >
+                {selectedPost && (
+                    <div className="space-y-6">
+                        <div className="flex items-center justify-between text-sm text-stone-500 border-b border-stone-200 pb-4">
+                            <span>By <span className="font-bold text-stone-700">Me</span></span>
+                            <span>{new Date(selectedPost.createdAt).toLocaleDateString()}</span>
+                        </div>
+                        <p className="text-lg leading-relaxed text-stone-800 whitespace-pre-wrap">
+                            {selectedPost.content}
+                        </p>
+                        <div className="mt-8 pt-8 border-t border-stone-200 flex justify-end">
+                            <span className={cn("text-sm font-bold px-3 py-1 rounded-full bg-stone-100", (selectedPost.score || 0) > 0 ? "text-orange-500" : "text-stone-500")}>
+                                {selectedPost.score || 0} Points
+                            </span>
+                        </div>
+                    </div>
+                )}
+            </PaperModal>
+        </div >
     );
 }

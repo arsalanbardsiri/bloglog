@@ -28,7 +28,7 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
             cancel_url: `${req.headers.origin}/pricing`,
         });
 
-        res.json({ id: session.id });
+        res.json({ id: session.id, url: session.url });
     } catch (error: any) {
         console.error('Stripe Checkout Error:', error);
         res.status(500).json({ error: error.message });

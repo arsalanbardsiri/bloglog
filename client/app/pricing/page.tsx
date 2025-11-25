@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { loadStripe } from "@stripe/stripe-js";
 
 const features = [
     "Access to all premium system design articles",
@@ -32,71 +33,79 @@ export default function PricingPage() {
 
             const data = await res.json();
 
-            if (data.id) {
-                // Redirect to Stripe Checkout
-                // In a real app, you'd use stripe.redirectToCheckout({ sessionId: data.id })
-                // For this demo, we'll just log it as we don't have a real frontend Stripe key setup yet
-                console.log("Redirecting to session:", data.id);
-                alert(`Redirecting to Stripe Session: ${data.id}`);
+            if (data.url) {
+                window.location.href = data.url;
+            } else if (data.id) {
+                // Fallback for older implementation if needed, but we prefer URL
+                const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+                if (!stripe) throw new Error("Stripe failed to load");
+
+                const { error } = await (stripe as any).redirectToCheckout({ sessionId: data.id });
+                if (error) throw error;
             }
         } catch (error) {
             console.error("Checkout error:", error);
-            alert("Failed to start checkout. Please try again.");
+            alert("Failed to start checkout. Please ensure API keys are set.");
         } finally {
             setIsLoading(false);
         }
     };
 
     return (
-        <div className="container mx-auto flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-24">
+        <div className="container mx-auto flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12">
             <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="relative w-full max-w-md overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/50 p-8 backdrop-blur-xl"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="relative w-full max-w-md bg-white p-8 shadow-xl transform rotate-1 border-t-8 border-stone-800"
+                style={{
+                    backgroundImage: "radial-gradient(#e5e7eb 1px, transparent 1px)",
+                    backgroundSize: "20px 20px"
+                }}
             >
-                <div className="absolute inset-0 -z-10 bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10" />
-
-                <div className="mb-8 text-center">
-                    <h2 className="mb-2 text-3xl font-bold text-white">Premium Access</h2>
-                    <p className="text-zinc-400">Unlock the full potential of System Design</p>
+                {/* Receipt Header */}
+                <div className="mb-8 text-center border-b-2 border-dashed border-stone-300 pb-6">
+                    <h2 className="mb-2 text-3xl font-handwriting font-bold text-stone-800">INVOICE</h2>
+                    <p className="text-stone-500 font-mono text-sm">RECEIPT #001-PREMIUM</p>
                 </div>
 
-                <div className="mb-8 flex items-baseline justify-center gap-1">
-                    <span className="text-5xl font-bold text-white">$10</span>
-                    <span className="text-zinc-400">/month</span>
+                <div className="mb-8 flex items-baseline justify-center gap-1 font-mono">
+                    <span className="text-5xl font-bold text-stone-800">$10</span>
+                    <span className="text-stone-500">/month</span>
                 </div>
 
-                <ul className="mb-8 space-y-4">
+                <ul className="mb-8 space-y-4 font-serif">
                     {features.map((feature) => (
-                        <li key={feature} className="flex items-center gap-3 text-zinc-300">
-                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-500/20 text-indigo-400">
-                                <Check className="h-4 w-4" />
+                        <li key={feature} className="flex items-center gap-3 text-stone-700">
+                            <div className="flex h-5 w-5 items-center justify-center rounded-full border border-stone-800 text-stone-800">
+                                <Check className="h-3 w-3" />
                             </div>
                             {feature}
                         </li>
                     ))}
                 </ul>
 
-                <button
-                    onClick={handleSubscribe}
-                    disabled={isLoading}
-                    className={cn(
-                        "w-full rounded-xl bg-white py-4 font-semibold text-black transition-all hover:bg-zinc-200 disabled:opacity-50",
-                        isLoading && "cursor-not-allowed"
-                    )}
-                >
-                    {isLoading ? (
-                        <span className="flex items-center justify-center gap-2">
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            Processing...
-                        </span>
-                    ) : (
-                        "Subscribe Now"
-                    )}
-                </button>
+                <div className="border-t-2 border-dashed border-stone-300 pt-6">
+                    <button
+                        onClick={handleSubscribe}
+                        disabled={isLoading}
+                        className={cn(
+                            "w-full rounded-sm bg-stone-800 py-4 font-bold text-white transition-all hover:bg-stone-700 disabled:opacity-50 shadow-lg",
+                            isLoading && "cursor-not-allowed"
+                        )}
+                    >
+                        {isLoading ? (
+                            <span className="flex items-center justify-center gap-2">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                Processing...
+                            </span>
+                        ) : (
+                            "PAY NOW"
+                        )}
+                    </button>
+                </div>
 
-                <p className="mt-6 text-center text-xs text-zinc-500">
-                    Secure payment powered by Stripe. Cancel anytime.
+                <p className="mt-6 text-center text-[10px] font-mono text-stone-400 uppercase">
+                    Secure payment powered by Stripe.<br />Thank you for your business.
                 </p>
             </motion.div>
         </div>
