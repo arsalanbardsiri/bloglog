@@ -57,24 +57,6 @@ Full Docker support for local development, orchestrating:
 
 ## 🚀 Getting Started
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/blog-lounge.git
-   cd blog-lounge
-   ```
-
-2. **Start the environment**
-   ```bash
-   docker-compose up --build
-   ```
-
-3. **Access the application**
-   - Frontend: `http://localhost:3000`
-   - Backend: `http://localhost:4000`
-   - Studio (DB): `npx prisma studio`
-
-## 🧠 Engineering Decisions
-
 ### Why PostgreSQL over MongoDB?
 While the original project used MongoDB, I migrated to **PostgreSQL** to demonstrate relational data modeling. Users, Posts, and Comments have strict relationships that are better enforced by SQL constraints, ensuring data integrity at scale.
 
