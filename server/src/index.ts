@@ -24,7 +24,11 @@ app.use(rateLimiter({
     message: 'Too many requests from this IP, please try again after 15 minutes'
 }));
 
+import postRoutes from './routes/postRoutes';
+
 // Routes
+app.use('/api/posts', postRoutes);
+
 app.get('/api/health', (req: Request, res: Response) => {
     res.status(200).json({ status: 'ok', message: 'Server is running' });
 });
