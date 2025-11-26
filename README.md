@@ -1,9 +1,29 @@
 # Blog Lounge 🚀
 
-> **A High-Scale Distributed Content Platform** designed to demonstrate Senior Engineering principles: Caching, Rate Limiting, Idempotency, and Microservices Architecture.
+> **A High-Scale Distributed Content Platform** designed to demonstrate Senior Engineering principles: Caching, Rate Limiting, Idempotency, and Microservices Architecture, wrapped in a unique "Origami Notebook" aesthetic.
 
 ![System Design](https://img.shields.io/badge/System%20Design-Distributed-blue)
 ![Tech Stack](https://img.shields.io/badge/Tech-Next.js%20%7C%20Node.js%20%7C%20Redis%20%7C%20Postgres-black)
+![Status](https://img.shields.io/badge/Status-Production%20Ready-green)
+
+## 🌟 Key Features
+
+### 1. Interactive Desk (Dashboard)
+- **Drag & Drop**: Organize your thoughts by dragging sticky notes around your desk.
+- **Persistence**: Your layout is saved automatically, so everything is exactly where you left it.
+- **Smart Interaction**: Dragging moves the note; clicking opens it. No more accidental opens!
+
+### 2. Community Feed (Explore)
+- **Public Board**: View thoughts from the entire community.
+- **Voting**: Upvote or downvote posts to surface the best content.
+- **Search**: Instantly filter posts by title, content, or author.
+- **Performance**: Powered by Redis caching for blazing fast load times.
+
+### 3. Engineering Excellence
+- **Microservices Ready**: Architecture designed for scale.
+- **CI/CD**: Automated build pipeline with GitHub Actions.
+- **Testing**: End-to-End testing infrastructure with Playwright.
+- **Code Quality**: Fully linted and type-checked codebase.
 
 ## 🏗️ System Architecture
 
@@ -24,11 +44,11 @@ graph TD
     end
 ```
 
-## 🌟 Key Engineering Features
+## 🧠 Engineering Decisions
 
 ### 1. Distributed Caching (Redis)
 Implemented the **Cache-Aside Pattern** to minimize database load and reduce latency.
-- **Read**: Checks Redis first (`GET posts:all`). If miss, queries DB and sets cache (TTL: 5 mins).
+- **Read**: Checks Redis first (`GET posts:all`). If miss, queries DB and sets cache (TTL: 60s).
 - **Write**: Invalidates cache on new post creation (`DEL posts:all`) to ensure consistency.
 
 ### 2. Rate Limiting (DDoS Protection)
@@ -42,26 +62,62 @@ Middleware to prevent "Double Charge" issues in payment processing.
 - **Mechanism**: Clients send a unique `Idempotency-Key` header.
 - **Logic**: Server caches the response of successful requests in Redis. If the same key is received, the cached response is returned immediately without re-processing the payment.
 
-### 4. Containerization (DevOps)
-Full Docker support for local development, orchestrating:
-- **Backend**: Node.js 20 (Alpine)
-- **Database**: PostgreSQL 15
-- **Cache**: Redis (Alpine)
-
 ## 🛠️ Tech Stack
 
 - **Frontend**: Next.js 14 (App Router), Tailwind CSS, Framer Motion.
 - **Backend**: Node.js, Express, TypeScript.
 - **Database**: PostgreSQL (via Prisma ORM).
-- **Infrastructure**: Docker, Docker Compose.
+- **Infrastructure**: Docker, Docker Compose, GitHub Actions.
+- **Testing**: Playwright (E2E).
 
 ## 🚀 Getting Started
 
-### Why PostgreSQL over MongoDB?
-While the original project used MongoDB, I migrated to **PostgreSQL** to demonstrate relational data modeling. Users, Posts, and Comments have strict relationships that are better enforced by SQL constraints, ensuring data integrity at scale.
+### Prerequisites
+- Node.js 20+
+- Docker (optional, for local DB/Redis)
 
-### Why Redis for Rate Limiting?
-In-memory storage is required for the speed of rate limiting checks. Redis allows this state to be shared across multiple backend instances (horizontal scaling), whereas local memory would fail in a distributed cluster.
+### Installation
+
+1.  **Clone the repository**
+    ```bash
+    git clone https://github.com/arsalanbardsiri/bloglog.git
+    cd bloglog
+    ```
+
+2.  **Install Dependencies**
+    ```bash
+    # Client
+    cd client
+    npm install
+
+    # Server
+    cd ../server
+    npm install
+    ```
+
+3.  **Environment Setup**
+    - Copy `.env.example` to `.env` in both `client` and `server` directories.
+    - Fill in your PostgreSQL and Redis credentials.
+
+4.  **Run Locally**
+    ```bash
+    # Start Backend
+    cd server
+    npm run dev
+
+    # Start Frontend
+    cd client
+    npm run dev
+    ```
+
+## 🧪 Testing
+
+Run the end-to-end test suite:
+
+```bash
+cd client
+npx playwright test
+```
 
 ---
 *Built as a Portfolio Project for Senior Software Engineering roles.*
