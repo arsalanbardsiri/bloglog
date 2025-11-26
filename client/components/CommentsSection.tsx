@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Loader2, Send } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface Comment {
     id: string;

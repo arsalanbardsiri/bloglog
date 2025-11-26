@@ -20,7 +20,7 @@ interface Post {
     author: {
         username: string;
     };
-    userVote?: number;
+    userVote?: number; // 1, -1, or 0
     commentCount?: number;
 }
 
@@ -76,12 +76,12 @@ export default function ExplorePage() {
                 setPosts(prev => prev.map(p => {
                     if (p.id === selectedPost.id) {
                         const oldVote = p.userVote || 0;
-                        let newVote = value;
+                        let newVote: number = value;
                         let newScore = p.score;
 
                         if (oldVote === value) {
                             // Toggle off
-                            newVote = 0 as any; // Cast to satisfy type if needed, or update type
+                            newVote = 0;
                             newScore = p.score - value;
                         } else {
                             // Change vote (or new vote)
@@ -98,11 +98,11 @@ export default function ExplorePage() {
                 setSelectedPost(prev => {
                     if (!prev) return null;
                     const oldVote = prev.userVote || 0;
-                    let newVote = value;
+                    let newVote: number = value;
                     let newScore = prev.score;
 
                     if (oldVote === value) {
-                        newVote = 0 as any;
+                        newVote = 0;
                         newScore = prev.score - value;
                     } else {
                         newScore = prev.score - oldVote + value;

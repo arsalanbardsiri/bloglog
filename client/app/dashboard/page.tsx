@@ -42,10 +42,11 @@ export default function DashboardPage() {
             const maxX = window.innerWidth - 280; // Note width + padding
             const maxY = window.innerHeight - 200; // Rough height limit
 
-            Object.entries(parsed).forEach(([id, pos]: [string, any]) => {
+            Object.entries(parsed).forEach(([id, pos]) => {
+                const p = pos as { x: number; y: number };
                 clamped[id] = {
-                    x: Math.min(Math.max(pos.x, -50), maxX > 0 ? maxX : 0),
-                    y: Math.min(Math.max(pos.y, -50), maxY > 0 ? maxY : 0)
+                    x: Math.min(Math.max(p.x, -50), maxX > 0 ? maxX : 0),
+                    y: Math.min(Math.max(p.y, -50), maxY > 0 ? maxY : 0)
                 };
             });
 

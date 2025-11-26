@@ -7,7 +7,7 @@ test('has title', async ({ page }) => {
 
 test('can navigate to explore', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('link', { name: 'Start Reading' }).click();
+    await page.getByRole('link', { name: 'Just looking around' }).click();
     await expect(page).toHaveURL(/.*explore/);
     await expect(page.getByText('Community Board')).toBeVisible();
 });
@@ -15,5 +15,5 @@ test('can navigate to explore', async ({ page }) => {
 test('login redirect', async ({ page }) => {
     await page.goto('/dashboard');
     // Should redirect to login if not authenticated
-    await expect(page).toHaveURL(/.*login/);
+    await page.waitForURL(/.*login/);
 });

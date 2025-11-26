@@ -16,7 +16,6 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
             <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
-                    // ... (keep existing components)
                     table({ children }) {
                         return <div className="overflow-x-auto mb-4"><table className="min-w-full divide-y divide-stone-700 border border-stone-700">{children}</table></div>;
                     },
@@ -35,14 +34,15 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
                     td({ children }) {
                         return <td className="px-3 py-2 whitespace-nowrap text-sm text-stone-300 border-r border-stone-700 last:border-r-0">{children}</td>;
                     },
-                    code({ node, inline, className, children, ...props }: any) {
+                    code({ inline, className, children, ...props }: any) {
                         const match = /language-(\w+)/.exec(className || '');
                         return !inline && match ? (
                             <SyntaxHighlighter
-                                {...props}
+                                // @ts-ignore
                                 style={vscDarkPlus}
                                 language={match[1]}
                                 PreTag="div"
+                                {...props}
                                 customStyle={{
                                     margin: '0.5rem 0',
                                     borderRadius: '0.375rem',
@@ -53,7 +53,7 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
                                 {String(children).replace(/\n$/, '')}
                             </SyntaxHighlighter>
                         ) : (
-                            <code {...props} className="bg-stone-200/50 px-1 py-0.5 rounded text-sm font-mono text-stone-800">
+                            <code className={className} {...props}>
                                 {children}
                             </code>
                         );
