@@ -119,7 +119,7 @@ export const votePost = async (req: Request, res: Response) => {
         // Actually, let's just clear 'posts:all*' if we can.
         const keys = await redis.keys('posts:all*');
         if (keys.length > 0) {
-            await redis.del(keys);
+            await redis.del(...keys);
         }
 
         res.json({ success: true });
@@ -145,14 +145,15 @@ export const createPost = async (req: Request, res: Response) => {
                 content,
                 tags: tags || [], // Default to empty array if not provided
                 slug: title.toLowerCase().replace(/ /g, '-') + '-' + Date.now(),
-                authorId
+                authorId,
+                published: true // Auto-publish for now
             }
         });
 
         // Invalidate cache
         const keys = await redis.keys('posts:*');
         if (keys.length > 0) {
-            await redis.del(keys);
+            await redis.del(...keys);
         }
 
         res.status(201).json(post);

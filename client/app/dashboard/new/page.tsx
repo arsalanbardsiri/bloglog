@@ -138,7 +138,7 @@ export default function CreatePostPage() {
                                     name="content"
                                     required
                                     rows={12}
-                                    className="w-full bg-transparent px-2 py-2 text-lg font-serif text-stone-800 focus:outline-none resize-none leading-[32px] custom-scrollbar"
+                                    className="w-full bg-transparent px-2 py-2 text-lg font-serif text-stone-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 rounded-sm caret-indigo-600 resize-none leading-[32px] custom-scrollbar min-h-[400px]"
                                     placeholder="Start writing..."
                                     style={{ lineHeight: "32px" }}
                                 />
