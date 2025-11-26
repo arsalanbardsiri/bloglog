@@ -34,11 +34,11 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
                     td({ children }) {
                         return <td className="px-3 py-2 whitespace-nowrap text-sm text-stone-300 border-r border-stone-700 last:border-r-0">{children}</td>;
                     },
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     code({ inline, className, children, ...props }: any) {
                         const match = /language-(\w+)/.exec(className || '');
                         return !inline && match ? (
                             <SyntaxHighlighter
-                                // @ts-ignore
                                 style={vscDarkPlus}
                                 language={match[1]}
                                 PreTag="div"

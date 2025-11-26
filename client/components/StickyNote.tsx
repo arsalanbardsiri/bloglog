@@ -17,7 +17,7 @@ interface StickyNoteProps {
     onDragEnd?: (e: MouseEvent | TouchEvent | PointerEvent, info: { offset: { x: number; y: number } }) => void;
     defaultPosition?: { x: number; y: number };
     draggable?: boolean;
-    dragConstraintsRef?: React.RefObject<any>;
+    dragConstraintsRef?: React.RefObject<Element | null>;
     commentCount?: number;
     tags?: string[];
 }

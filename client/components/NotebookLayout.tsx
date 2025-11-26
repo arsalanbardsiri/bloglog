@@ -66,7 +66,7 @@ export function NotebookLayout({ children }: NotebookLayoutProps) {
 
                     {/* Desktop Tabs (Right Side) */}
                     <div className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 flex-col gap-3 z-10 pr-2">
-                        {tabs.map((tab, index) => {
+                        {tabs.map((tab) => {
                             const isActive = pathname === tab.href;
                             return (
                                 <Link key={tab.href} href={tab.href} className="relative group">
