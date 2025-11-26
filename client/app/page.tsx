@@ -7,7 +7,7 @@ import { Typewriter } from "@/components/Typewriter";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-[#F5F5F0] px-4 text-center relative overflow-hidden">
+    <main className="flex flex-col items-center justify-center px-4 text-center relative overflow-hidden h-full py-12">
 
       {/* The Board */}
       <div className="relative z-10 p-8 md:p-12 wood-frame chalkboard max-w-5xl w-full mx-auto transform rotate-1 shadow-2xl">
@@ -64,7 +64,7 @@ export default function Home() {
         </div>
       </div>
 
-      <footer className="absolute bottom-6 text-stone-600 font-serif text-sm">
+      <footer className="absolute bottom-6 text-stone-500 font-serif text-sm">
         © 2025 Blog Lounge. Class is in session.
       </footer>
     </main>
