@@ -149,7 +149,7 @@ export function NotebookLayout({ children }: NotebookLayoutProps) {
                         />
 
                         {/* Red Margin Line */}
-                        <div className="absolute left-8 md:left-12 top-0 bottom-0 w-px bg-red-200 pointer-events-none" />
+                        <div className="absolute left-6 md:left-12 top-0 bottom-0 w-px bg-red-200 pointer-events-none" />
 
                         {/* Content Area */}
                         <div className="relative z-10 h-full overflow-y-auto custom-scrollbar pb-20 md:pb-0">
@@ -167,7 +167,7 @@ export function NotebookLayout({ children }: NotebookLayoutProps) {
                             </div>
 
                             {/* Page Content */}
-                            <div className="p-4 md:p-16 min-h-full">
+                            <div className="p-4 pl-10 md:p-16 min-h-full">
                                 <AnimatePresence mode="wait">
                                     <motion.div
                                         key={pathname}

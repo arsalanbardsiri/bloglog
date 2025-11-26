@@ -36,6 +36,8 @@ export default function CreatePostPage() {
         const formData = new FormData(e.target as HTMLFormElement);
         const title = formData.get("title") as string;
         const content = formData.get("content") as string;
+        const tagsString = formData.get("tags") as string;
+        const tags = tagsString ? tagsString.split(',').map(t => t.trim()).filter(t => t.length > 0) : [];
 
         try {
             const res = await fetch("http://localhost:4000/api/posts", {
@@ -44,7 +46,7 @@ export default function CreatePostPage() {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({ title, content }),
+                body: JSON.stringify({ title, content, tags }),
             });
 
             if (!res.ok) {
@@ -108,6 +110,16 @@ export default function CreatePostPage() {
                                 required
                                 className="w-full bg-transparent border-b-2 border-stone-300 px-2 py-2 text-2xl font-handwriting text-stone-800 focus:border-indigo-500 focus:outline-none transition-colors placeholder:text-stone-300"
                                 placeholder="What's on your mind?"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="block text-xs font-bold text-stone-400 uppercase tracking-wider font-typewriter">Tags (Optional)</label>
+                            <input
+                                name="tags"
+                                type="text"
+                                className="w-full bg-transparent border-b-2 border-stone-300 px-2 py-2 text-sm font-mono text-stone-600 focus:border-indigo-500 focus:outline-none transition-colors placeholder:text-stone-300"
+                                placeholder="e.g. react, bug, idea (comma separated)"
                             />
                         </div>
 

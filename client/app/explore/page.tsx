@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Loader2, Search, Pin } from "lucide-react";
 import { StickyNote } from "@/components/StickyNote";
+import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 import { PaperModal } from "@/components/PaperModal";
+import { CommentsSection } from "@/components/CommentsSection";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 
@@ -14,10 +16,12 @@ interface Post {
     content: string;
     createdAt: string;
     score: number;
+    tags?: string[];
     author: {
         username: string;
     };
     userVote?: number;
+    commentCount?: number;
 }
 
 export default function ExplorePage() {
@@ -26,16 +30,20 @@ export default function ExplorePage() {
     const [isLoading, setIsLoading] = useState(true);
     const [selectedPost, setSelectedPost] = useState<Post | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
+    const [sortBy, setSortBy] = useState<"new" | "top">("new");
+
+    const [page, setPage] = useState(1);
 
     useEffect(() => {
         const fetchPosts = async () => {
+            setIsLoading(true);
             try {
                 const headers: HeadersInit = {};
                 if (token) {
                     headers["Authorization"] = `Bearer ${token}`;
                 }
 
-                const res = await fetch("http://localhost:4000/api/posts", { headers });
+                const res = await fetch(`http://localhost:4000/api/posts?sort=${sortBy}&page=${page}&limit=9`, { headers });
                 if (res.ok) {
                     const data = await res.json();
                     setPosts(data);
@@ -48,7 +56,7 @@ export default function ExplorePage() {
         };
 
         fetchPosts();
-    }, [token]);
+    }, [token, sortBy, page]);
 
     const handleVote = async (value: 1 | -1) => {
         if (!selectedPost || !token) return;
@@ -68,17 +76,40 @@ export default function ExplorePage() {
                 setPosts(prev => prev.map(p => {
                     if (p.id === selectedPost.id) {
                         const oldVote = p.userVote || 0;
-                        // If clicking same vote, toggle off (0). If different, set to new value.
-                        // Actually backend upserts, so let's just assume simple set for now or handle toggle logic if backend supports it.
-                        // For simplicity, just set the value.
-                        const newScore = p.score - oldVote + value;
-                        return { ...p, score: newScore, userVote: value };
+                        let newVote = value;
+                        let newScore = p.score;
+
+                        if (oldVote === value) {
+                            // Toggle off
+                            newVote = 0 as any; // Cast to satisfy type if needed, or update type
+                            newScore = p.score - value;
+                        } else {
+                            // Change vote (or new vote)
+                            // If switching from -1 to 1, we add 2. If 0 to 1, add 1.
+                            newScore = p.score - oldVote + value;
+                        }
+
+                        return { ...p, score: newScore, userVote: newVote };
                     }
                     return p;
                 }));
 
                 // Update selected post as well
-                setSelectedPost(prev => prev ? { ...prev, score: prev.score - (prev.userVote || 0) + value, userVote: value } : null);
+                setSelectedPost(prev => {
+                    if (!prev) return null;
+                    const oldVote = prev.userVote || 0;
+                    let newVote = value;
+                    let newScore = prev.score;
+
+                    if (oldVote === value) {
+                        newVote = 0 as any;
+                        newScore = prev.score - value;
+                    } else {
+                        newScore = prev.score - oldVote + value;
+                    }
+
+                    return { ...prev, score: newScore, userVote: newVote };
+                });
             }
         } catch (error) {
             console.error("Failed to vote", error);
@@ -114,6 +145,28 @@ export default function ExplorePage() {
                     />
                     <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
                 </div>
+
+                {/* Sort Tabs */}
+                <div className="mt-6 flex justify-center gap-4 font-typewriter text-sm">
+                    <button
+                        onClick={() => setSortBy("new")}
+                        className={cn(
+                            "px-4 py-1 rounded-full transition-all",
+                            sortBy === "new" ? "bg-stone-800 text-white shadow-md" : "text-stone-500 hover:bg-stone-200"
+                        )}
+                    >
+                        Newest
+                    </button>
+                    <button
+                        onClick={() => setSortBy("top")}
+                        className={cn(
+                            "px-4 py-1 rounded-full transition-all",
+                            sortBy === "top" ? "bg-stone-800 text-white shadow-md" : "text-stone-500 hover:bg-stone-200"
+                        )}
+                    >
+                        Top Rated
+                    </button>
+                </div>
             </motion.div>
 
             {isLoading ? (
@@ -132,6 +185,7 @@ export default function ExplorePage() {
                             color={["yellow", "blue", "green", "pink"][index % 4] as "yellow" | "blue" | "green" | "pink"}
                             rotation={Math.random() * 6 - 3}
                             onClick={() => setSelectedPost(post)}
+                            commentCount={post.commentCount}
                         />
                     ))}
                 </div>
@@ -141,6 +195,29 @@ export default function ExplorePage() {
                 <div className="text-center py-20 opacity-50">
                     <Pin className="h-12 w-12 mx-auto mb-4 text-stone-300" />
                     <p className="font-handwriting text-xl text-stone-400">No notes found...</p>
+                </div>
+            )}
+
+            {/* Pagination Controls */}
+            {!isLoading && (posts.length > 0 || page > 1) && (
+                <div className="mt-12 flex justify-center gap-4">
+                    <button
+                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                        disabled={page === 1}
+                        className="px-4 py-2 rounded-lg bg-white border border-stone-200 text-stone-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-stone-50 transition-colors font-typewriter text-sm"
+                    >
+                        Previous Page
+                    </button>
+                    <span className="flex items-center px-4 font-typewriter text-stone-400 text-sm">
+                        Page {page}
+                    </span>
+                    <button
+                        onClick={() => setPage(p => p + 1)}
+                        disabled={posts.length < 9}
+                        className="px-4 py-2 rounded-lg bg-white border border-stone-200 text-stone-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-stone-50 transition-colors font-typewriter text-sm"
+                    >
+                        Next Page
+                    </button>
                 </div>
             )}
 
@@ -155,9 +232,20 @@ export default function ExplorePage() {
                             <span>By <span className="font-bold text-stone-700">@{selectedPost.author.username}</span></span>
                             <span>{new Date(selectedPost.createdAt).toLocaleDateString()}</span>
                         </div>
-                        <p className="text-lg leading-relaxed text-stone-800 whitespace-pre-wrap font-serif">
-                            {selectedPost.content}
-                        </p>
+
+                        {/* Tags in Modal */}
+                        {selectedPost.tags && selectedPost.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mb-4">
+                                {selectedPost.tags.map((tag: string, i: number) => (
+                                    <span key={i} className="text-xs px-2 py-1 rounded-full bg-stone-100 text-stone-600 font-mono border border-stone-200">
+                                        #{tag}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+                        <div className="text-lg leading-relaxed text-stone-800">
+                            <MarkdownRenderer content={selectedPost.content} />
+                        </div>
 
                         <div className="mt-8 pt-8 border-t border-stone-200 flex items-center justify-between">
                             <div className="flex items-center gap-4">
@@ -188,6 +276,8 @@ export default function ExplorePage() {
                                 <span className="text-xs text-stone-400 italic">Login to vote</span>
                             )}
                         </div>
+
+                        <CommentsSection postId={selectedPost.id} />
                     </div>
                 )}
             </PaperModal>

@@ -2,13 +2,15 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import NextImage from "next/image";
 import { Plus, FileText, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { StickyNote } from "@/components/StickyNote";
 import { PaperModal } from "@/components/PaperModal";
+import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 
 interface Post {
     id: string;
@@ -16,6 +18,7 @@ interface Post {
     content: string;
     createdAt: string;
     score: number;
+    tags?: string[];
 }
 
 export default function DashboardPage() {
@@ -24,24 +27,42 @@ export default function DashboardPage() {
     const [posts, setPosts] = useState<Post[]>([]);
     const [loadingPosts, setLoadingPosts] = useState(true);
     const [selectedPost, setSelectedPost] = useState<Post | null>(null);
-    const [notePositions, setNotePositions] = useState<Record<string, { x: number; y: number }>>({});
+    // Use state for initial render, ref for tracking updates without re-renders
+    const [initialPositions, setInitialPositions] = useState<Record<string, { x: number; y: number }>>({});
+    const notePositionsRef = useRef<Record<string, { x: number; y: number }>>({});
+    const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const saved = localStorage.getItem("notePositions");
         if (saved) {
-            setNotePositions(JSON.parse(saved));
+            const parsed = JSON.parse(saved);
+            const clamped: Record<string, { x: number; y: number }> = {};
+
+            // Clamp positions to be within viewport
+            const maxX = window.innerWidth - 280; // Note width + padding
+            const maxY = window.innerHeight - 200; // Rough height limit
+
+            Object.entries(parsed).forEach(([id, pos]: [string, any]) => {
+                clamped[id] = {
+                    x: Math.min(Math.max(pos.x, -50), maxX > 0 ? maxX : 0),
+                    y: Math.min(Math.max(pos.y, -50), maxY > 0 ? maxY : 0)
+                };
+            });
+
+            setInitialPositions(clamped);
+            notePositionsRef.current = clamped;
         }
     }, []);
 
     const handleDragEnd = (id: string, info: { offset: { x: number; y: number } }) => {
-        const current = notePositions[id] || { x: 0, y: 0 };
+        const current = notePositionsRef.current[id] || { x: 0, y: 0 };
         const newPos = {
             x: current.x + info.offset.x,
             y: current.y + info.offset.y
         };
 
-        const updated = { ...notePositions, [id]: newPos };
-        setNotePositions(updated);
+        const updated = { ...notePositionsRef.current, [id]: newPos };
+        notePositionsRef.current = updated;
         localStorage.setItem("notePositions", JSON.stringify(updated));
     };
 
@@ -51,11 +72,13 @@ export default function DashboardPage() {
         }
     }, [isLoading, token, router]);
 
+    const [page, setPage] = useState(1);
+
     useEffect(() => {
         const fetchMyPosts = async () => {
             if (!token) return;
             try {
-                const res = await fetch("http://localhost:4000/api/posts/me", {
+                const res = await fetch(`http://localhost:4000/api/posts/me?page=${page}&limit=6`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 if (res.ok) {
@@ -70,7 +93,7 @@ export default function DashboardPage() {
         };
 
         fetchMyPosts();
-    }, [token]);
+    }, [token, page]);
 
     if (isLoading || !user) {
         return (
@@ -81,7 +104,7 @@ export default function DashboardPage() {
     }
 
     return (
-        <div className="container mx-auto px-4 py-12">
+        <div className="container mx-auto px-4 py-12" ref={containerRef}>
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -129,8 +152,9 @@ export default function DashboardPage() {
                                         rotation={Math.random() * 4 - 2}
                                         onClick={() => setSelectedPost(post)}
                                         onDragEnd={(_, info) => handleDragEnd(post.id, info)}
-                                        defaultPosition={notePositions[post.id]}
+                                        defaultPosition={initialPositions[post.id]}
                                         draggable={true}
+                                        dragConstraintsRef={containerRef}
                                     />
                                 </div>
                             ))}
@@ -148,6 +172,29 @@ export default function DashboardPage() {
                             >
                                 Write a note
                             </Link>
+                        </div>
+                    )}
+
+                    {/* Pagination Controls */}
+                    {!loadingPosts && (posts.length > 0 || page > 1) && (
+                        <div className="mt-8 flex justify-center gap-4">
+                            <button
+                                onClick={() => setPage(p => Math.max(1, p - 1))}
+                                disabled={page === 1}
+                                className="px-3 py-1 rounded-lg bg-white/50 border border-stone-200 text-stone-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-stone-100 transition-colors font-typewriter text-xs"
+                            >
+                                Previous
+                            </button>
+                            <span className="flex items-center px-2 font-typewriter text-stone-500 text-xs">
+                                Page {page}
+                            </span>
+                            <button
+                                onClick={() => setPage(p => p + 1)}
+                                disabled={posts.length < 6}
+                                className="px-3 py-1 rounded-lg bg-white/50 border border-stone-200 text-stone-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-stone-100 transition-colors font-typewriter text-xs"
+                            >
+                                Next
+                            </button>
                         </div>
                     )}
                 </div>
@@ -173,11 +220,12 @@ export default function DashboardPage() {
 
                     {/* Origami Decoration */}
                     <div className="relative h-0">
-                        <div className="absolute -right-8 -bottom-8 w-32 h-32 z-10 pointer-events-none opacity-90 rotate-6">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
+                        <div className="absolute -right-8 -bottom-24 w-32 h-32 z-10 pointer-events-none opacity-90 rotate-6">
+                            <NextImage
                                 src="/assets/origami/plane.png"
                                 alt="Origami Plane"
+                                width={128}
+                                height={128}
                                 className="w-full h-full object-contain drop-shadow-md mix-blend-multiply"
                             />
                         </div>
@@ -196,9 +244,20 @@ export default function DashboardPage() {
                             <span>By <span className="font-bold text-stone-700">Me</span></span>
                             <span>{new Date(selectedPost.createdAt).toLocaleDateString()}</span>
                         </div>
-                        <p className="text-lg leading-relaxed text-stone-800 whitespace-pre-wrap">
-                            {selectedPost.content}
-                        </p>
+
+                        {/* Tags in Modal */}
+                        {selectedPost.tags && selectedPost.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mb-4">
+                                {selectedPost.tags.map((tag, i) => (
+                                    <span key={i} className="text-xs px-2 py-1 rounded-full bg-stone-100 text-stone-600 font-mono border border-stone-200">
+                                        #{tag}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+                        <div className="text-lg leading-relaxed text-stone-800">
+                            <MarkdownRenderer content={selectedPost.content} />
+                        </div>
                         <div className="mt-8 pt-8 border-t border-stone-200 flex justify-end">
                             <span className={cn("text-sm font-bold px-3 py-1 rounded-full bg-stone-100", (selectedPost.score || 0) > 0 ? "text-orange-500" : "text-stone-500")}>
                                 {selectedPost.score || 0} Points

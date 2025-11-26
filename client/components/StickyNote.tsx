@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Pin } from "lucide-react";
 import { useRef } from "react";
+import { MarkdownRenderer } from "./MarkdownRenderer";
 
 interface StickyNoteProps {
     title: string;
@@ -16,6 +17,9 @@ interface StickyNoteProps {
     onDragEnd?: (e: MouseEvent | TouchEvent | PointerEvent, info: { offset: { x: number; y: number } }) => void;
     defaultPosition?: { x: number; y: number };
     draggable?: boolean;
+    dragConstraintsRef?: any;
+    commentCount?: number;
+    tags?: string[];
 }
 
 const colors = {
@@ -35,7 +39,10 @@ export function StickyNote({
     onClick,
     onDragEnd,
     defaultPosition = { x: 0, y: 0 },
-    draggable = false
+    draggable = false,
+    dragConstraintsRef,
+    commentCount = 0,
+    tags = []
 }: StickyNoteProps) {
     const isDragging = useRef(false);
 
@@ -62,7 +69,7 @@ export function StickyNote({
     return (
         <motion.div
             drag={draggable}
-            dragConstraints={draggable ? { left: -500, right: 500, top: -500, bottom: 500 } : undefined}
+            dragConstraints={dragConstraintsRef || (draggable ? { left: -500, right: 500, top: -500, bottom: 500 } : undefined)}
             dragElastic={0.1}
             dragMomentum={false}
             whileHover={{ scale: 1.05, zIndex: 50, cursor: draggable ? "grab" : "pointer" }}
@@ -90,13 +97,35 @@ export function StickyNote({
             {/* Content */}
             <div className="flex-1 overflow-hidden">
                 <h3 className="text-xl font-bold mb-2 leading-tight">{title}</h3>
-                <p className="text-sm opacity-80 line-clamp-6">{content}</p>
+                <div className="text-sm opacity-80 line-clamp-5">
+                    <MarkdownRenderer content={content} />
+                </div>
             </div>
 
+            {/* Tags */}
+            {tags && tags.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1">
+                    {tags.slice(0, 3).map((tag, i) => (
+                        <span key={i} className="text-[10px] px-1.5 py-0.5 rounded-full bg-black/5 text-black/60 font-mono">
+                            #{tag}
+                        </span>
+                    ))}
+                    {tags.length > 3 && <span className="text-[10px] text-black/40">+{tags.length - 3}</span>}
+                </div>
+            )}
+
             {/* Footer */}
-            <div className="mt-4 flex justify-between items-end text-xs opacity-60 font-sans">
-                <span>{author}</span>
-                <span>{date}</span>
+            <div className="mt-auto flex justify-between items-end pt-2">
+                <div className="text-xs text-stone-600 font-serif italic">
+                    {date && <span>{date}</span>}
+                    {author && <span className="block font-bold not-italic">@{author}</span>}
+                </div>
+                {commentCount > 0 && (
+                    <div className="text-xs font-bold text-stone-500 flex items-center gap-1">
+                        <span>{commentCount}</span>
+                        <span className="text-[10px] uppercase tracking-wider">notes</span>
+                    </div>
+                )}
             </div>
         </motion.div>
     );

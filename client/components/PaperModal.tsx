@@ -59,11 +59,11 @@ export function PaperModal({ isOpen, onClose, title, children }: PaperModalProps
                                 marginTop: "4rem"
                             }}
                         />
-                        <div className="absolute left-12 top-0 bottom-0 w-px bg-red-200 pointer-events-none" />
+                        <div className="absolute left-6 md:left-12 top-0 bottom-0 w-px bg-red-200 pointer-events-none" />
 
                         {/* Header */}
-                        <div className="relative z-10 flex items-center justify-between p-6 border-b border-transparent">
-                            <h2 className="text-2xl font-handwriting text-stone-800 pl-8">{title}</h2>
+                        <div className="relative z-10 flex items-center justify-between p-4 pl-10 md:p-6 md:pl-8 border-b border-transparent">
+                            <h2 className="text-2xl font-handwriting text-stone-800 md:pl-8">{title}</h2>
                             <button
                                 onClick={onClose}
                                 className="p-2 rounded-full hover:bg-stone-200 transition-colors text-stone-500"
@@ -73,7 +73,7 @@ export function PaperModal({ isOpen, onClose, title, children }: PaperModalProps
                         </div>
 
                         {/* Content */}
-                        <div className="relative z-10 flex-1 overflow-y-auto custom-scrollbar p-6 pl-14 pr-8">
+                        <div className="relative z-10 flex-1 overflow-y-auto custom-scrollbar p-4 pl-10 md:p-6 md:pl-14 pr-4 md:pr-8">
                             <div className="prose prose-stone max-w-none font-serif">
                                 {children}
                             </div>
