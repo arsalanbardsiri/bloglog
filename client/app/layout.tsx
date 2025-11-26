@@ -25,6 +25,9 @@ export const metadata: Metadata = {
     title: "Blog Lounge | The Developer's Notebook",
     description: "Share your code, ideas, and stories in a beautiful, origami-inspired digital notebook.",
   },
+  icons: {
+    icon: "/icon.jpg",
+  },
 };
 
 export default function RootLayout({
