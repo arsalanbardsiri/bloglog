@@ -3,6 +3,7 @@
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import remarkGfm from 'remark-gfm';
 
 interface MarkdownRendererProps {
     content: string;
@@ -13,7 +14,27 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
     return (
         <div className={className}>
             <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
                 components={{
+                    // ... (keep existing components)
+                    table({ children }) {
+                        return <div className="overflow-x-auto mb-4"><table className="min-w-full divide-y divide-stone-700 border border-stone-700">{children}</table></div>;
+                    },
+                    thead({ children }) {
+                        return <thead className="bg-stone-800">{children}</thead>;
+                    },
+                    tbody({ children }) {
+                        return <tbody className="divide-y divide-stone-700 bg-stone-900/50">{children}</tbody>;
+                    },
+                    tr({ children }) {
+                        return <tr>{children}</tr>;
+                    },
+                    th({ children }) {
+                        return <th className="px-3 py-2 text-left text-xs font-medium text-stone-300 uppercase tracking-wider border-r border-stone-700 last:border-r-0">{children}</th>;
+                    },
+                    td({ children }) {
+                        return <td className="px-3 py-2 whitespace-nowrap text-sm text-stone-300 border-r border-stone-700 last:border-r-0">{children}</td>;
+                    },
                     code({ node, inline, className, children, ...props }: any) {
                         const match = /language-(\w+)/.exec(className || '');
                         return !inline && match ? (
