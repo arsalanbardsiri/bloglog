@@ -2,15 +2,23 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 
 export default function SignupPage() {
-    const { login } = useAuth();
+    const { login, token, user } = useAuth();
+    const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
+
+    useEffect(() => {
+        if (token && user) {
+            router.push("/dashboard");
+        }
+    }, [token, user, router]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
