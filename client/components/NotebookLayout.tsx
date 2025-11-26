@@ -42,7 +42,7 @@ export function NotebookLayout({ children }: NotebookLayoutProps) {
                         {tabs.find(t => t.href === pathname)?.name || "Notebook"}
                     </span>
                     {user && (
-                        <button onClick={logout} className="text-stone-400">
+                        <button onClick={logout} className="text-stone-400" aria-label="Logout">
                             <LogOut className="w-5 h-5" />
                         </button>
                     )}
@@ -160,7 +160,7 @@ export function NotebookLayout({ children }: NotebookLayoutProps) {
                                 </h1>
 
                                 {user && (
-                                    <button onClick={logout} className="text-stone-400 hover:text-red-400 transition-colors">
+                                    <button onClick={logout} className="text-stone-400 hover:text-red-400 transition-colors" aria-label="Logout">
                                         <LogOut className="w-5 h-5" />
                                     </button>
                                 )}
@@ -190,7 +190,7 @@ export function NotebookLayout({ children }: NotebookLayoutProps) {
                     {tabs.map((tab) => {
                         const isActive = pathname === tab.href;
                         return (
-                            <Link key={tab.href} href={tab.href} className="flex flex-col items-center gap-1 p-2">
+                            <Link key={tab.href} href={tab.href} className="flex flex-col items-center gap-1 p-2" aria-label={tab.name}>
                                 <div className={cn("p-1.5 rounded-full transition-colors", isActive ? tab.color.replace('bg-', 'text-') : "text-stone-400")}>
                                     <tab.icon className="w-5 h-5" />
                                 </div>
@@ -202,7 +202,7 @@ export function NotebookLayout({ children }: NotebookLayoutProps) {
                     })}
                     {/* Mobile Auth Link */}
                     {user ? (
-                        <Link href="/dashboard" className="flex flex-col items-center gap-1 p-2">
+                        <Link href="/dashboard" className="flex flex-col items-center gap-1 p-2" aria-label="Dashboard">
                             <div className={cn("p-1.5 rounded-full transition-colors", pathname.startsWith("/dashboard") ? "text-purple-400" : "text-stone-400")}>
                                 <User className="w-5 h-5" />
                             </div>
@@ -211,7 +211,7 @@ export function NotebookLayout({ children }: NotebookLayoutProps) {
                             </span>
                         </Link>
                     ) : (
-                        <Link href="/login" className="flex flex-col items-center gap-1 p-2">
+                        <Link href="/login" className="flex flex-col items-center gap-1 p-2" aria-label="Login">
                             <div className={cn("p-1.5 rounded-full transition-colors", pathname === "/login" ? "text-indigo-400" : "text-stone-400")}>
                                 <LogIn className="w-5 h-5" />
                             </div>

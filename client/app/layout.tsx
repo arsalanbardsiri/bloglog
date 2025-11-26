@@ -5,24 +5,24 @@ import { AuthProvider } from "@/context/AuthContext";
 
 
 
-export const metadata: Metadata = {
-  title: {
-    default: "Blog Lounge | Premium Content Platform",
+title: {
+    default: "Blog Lounge | The Developer's Notebook",
     template: "%s | Blog Lounge",
   },
-  description: "A high-scale distributed content platform for modern engineering. Featuring Redis caching, rate limiting, and microservices.",
-  openGraph: {
-    title: "Blog Lounge | Premium Content Platform",
-    description: "A high-scale distributed content platform for modern engineering.",
-    url: "https://blog-lounge.demo",
-    siteName: "Blog Lounge",
-    locale: "en_US",
-    type: "website",
+description: "A community for developers to share knowledge, snippets, and ideas. Featuring markdown support, code highlighting, and a unique origami-inspired design.",
+  keywords: ["developer blog", "coding community", "markdown notes", "programmer portfolio", "tech sharing", "nextjs", "react", "origami design"],
+    openGraph: {
+  title: "Blog Lounge | The Developer's Notebook",
+    description: "Share your code, ideas, and stories in a beautiful, origami-inspired digital notebook.",
+      url: "https://blog-lounge.demo",
+        siteName: "Blog Lounge",
+          locale: "en_US",
+            type: "website",
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "Blog Lounge | Premium Content Platform",
-    description: "A high-scale distributed content platform for modern engineering.",
+twitter: {
+  card: "summary_large_image",
+    title: "Blog Lounge | The Developer's Notebook",
+      description: "Share your code, ideas, and stories in a beautiful, origami-inspired digital notebook.",
   },
 };
 
