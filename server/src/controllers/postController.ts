@@ -8,34 +8,41 @@ export const getPosts = async (req: Request, res: Response) => {
     try {
         // @ts-ignore
         const userId = req.user?.userId;
-        const cacheKey = 'posts:all';
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 9;
+        const sort = req.query.sort as string || 'new';
+        const skip = (page - 1) * limit;
 
-        let posts = [];
+        const cacheKey = `posts:all:${sort}:${page}:${limit}`;
+
+        // Try cache first
         const cachedPosts = await redis.get(cacheKey);
-
         if (cachedPosts) {
-            posts = JSON.parse(cachedPosts);
-        } else {
-            posts = await prisma.post.findMany({
-                where: { published: true },
-                include: {
-                    author: { select: { username: true } },
-                    votes: true,
-                    _count: { select: { comments: true } }
-                },
-                orderBy: { createdAt: 'desc' }
-            });
-
-            // Cache for 60 seconds
-            await redis.setex(cacheKey, 60, JSON.stringify(posts));
+            return res.json(JSON.parse(cachedPosts));
         }
 
-        const postsWithScore = posts.map((post: any) => {
-            const score = post.votes.reduce((acc: any, vote: any) => acc + vote.value, 0);
-            const userVote = userId ? post.votes.find((v: any) => v.userId === userId)?.value : undefined;
-            const { votes, _count, ...postData } = post; // Remove raw votes array from response
-            return { ...postData, score, userVote, commentCount: _count?.comments || post.commentCount };
+        const orderBy = sort === 'top' ? { score: 'desc' } : { createdAt: 'desc' };
+
+        const posts = await prisma.post.findMany({
+            where: { published: true },
+            include: {
+                author: { select: { username: true } },
+                votes: true,
+                _count: { select: { comments: true } }
+            },
+            orderBy: orderBy as any,
+            skip,
+            take: limit
         });
+
+        const postsWithScore = posts.map((post: any) => {
+            const userVote = userId ? post.votes.find((v: any) => v.userId === userId)?.value : undefined;
+            const { votes, _count, ...postData } = post;
+            return { ...postData, userVote, commentCount: _count?.comments || post.commentCount };
+        });
+
+        // Cache for 60 seconds
+        await redis.setex(cacheKey, 60, JSON.stringify(postsWithScore));
 
         res.json(postsWithScore);
     } catch (error) {
@@ -59,23 +66,61 @@ export const votePost = async (req: Request, res: Response) => {
             return res.status(400).json({ error: 'Invalid vote value' });
         }
 
-        await prisma.vote.upsert({
+        const existingVote = await prisma.vote.findUnique({
             where: {
                 userId_postId: {
                     userId,
                     postId: id
                 }
-            },
-            update: { value },
-            create: {
-                userId,
-                postId: id,
-                value
             }
         });
 
-        // Invalidate Cache
-        await redis.del('posts:all');
+        if (existingVote && existingVote.value === value) {
+            // Toggle off (delete vote)
+            await prisma.$transaction([
+                prisma.vote.delete({
+                    where: {
+                        userId_postId: { userId, postId: id }
+                    }
+                }),
+                prisma.post.update({
+                    where: { id },
+                    data: { score: { decrement: value } }
+                })
+            ]);
+        } else {
+            // Upsert new vote
+            const scoreChange = existingVote ? value - existingVote.value : value;
+
+            await prisma.$transaction([
+                prisma.vote.upsert({
+                    where: {
+                        userId_postId: { userId, postId: id }
+                    },
+                    update: { value },
+                    create: {
+                        userId,
+                        postId: id,
+                        value
+                    }
+                }),
+                prisma.post.update({
+                    where: { id },
+                    data: { score: { increment: scoreChange } }
+                })
+            ]);
+        }
+
+        // Invalidate Cache (wildcard deletion would be better, but for now just clear common keys)
+        // Since keys are dynamic, we might need a pattern match or just rely on TTL.
+        // For simplicity, we won't manually invalidate all paginated keys here as it requires SCAN.
+        // But we can try to invalidate the main ones if we knew them.
+        // Let's just rely on short TTL (60s) for now, or use a Redis pattern delete if available.
+        // Actually, let's just clear 'posts:all*' if we can.
+        const keys = await redis.keys('posts:all*');
+        if (keys.length > 0) {
+            await redis.del(keys);
+        }
 
         res.json({ success: true });
     } catch (error) {
@@ -86,31 +131,29 @@ export const votePost = async (req: Request, res: Response) => {
 
 export const createPost = async (req: Request, res: Response) => {
     try {
+        const { title, content, tags } = req.body;
         // @ts-ignore
-        const userId = req.user?.userId;
-        const { title, content } = req.body;
+        const authorId = req.user?.userId;
 
-        if (!userId) {
+        if (!authorId) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
-
-        const slug = title
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/(^-|-$)+/g, '') + '-' + Date.now();
 
         const post = await prisma.post.create({
             data: {
                 title,
                 content,
-                slug,
-                authorId: userId,
-                published: true
+                tags: tags || [], // Default to empty array if not provided
+                slug: title.toLowerCase().replace(/ /g, '-') + '-' + Date.now(),
+                authorId
             }
         });
 
-        // Invalidate Cache
-        await redis.del('posts:all');
+        // Invalidate cache
+        const keys = await redis.keys('posts:*');
+        if (keys.length > 0) {
+            await redis.del(keys);
+        }
 
         res.status(201).json(post);
     } catch (error) {
@@ -123,6 +166,9 @@ export const getMyPosts = async (req: Request, res: Response) => {
     try {
         // @ts-ignore
         const userId = req.user?.userId;
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 6;
+        const skip = (page - 1) * limit;
 
         if (!userId) {
             return res.status(401).json({ error: 'Unauthorized' });
@@ -131,11 +177,13 @@ export const getMyPosts = async (req: Request, res: Response) => {
         const posts = await prisma.post.findMany({
             where: { authorId: userId },
             include: { votes: true },
-            orderBy: { createdAt: 'desc' }
+            orderBy: { createdAt: 'desc' },
+            skip,
+            take: limit
         });
 
         const postsWithScore = posts.map(post => {
-            const score = post.votes.reduce((acc, vote) => acc + vote.value, 0);
+            const score = post.score; // Use DB score
             const { votes, ...postData } = post;
             return { ...postData, score };
         });
