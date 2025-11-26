@@ -40,6 +40,7 @@ export default function PricingPage() {
                 const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
                 if (!stripe) throw new Error("Stripe failed to load");
 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const { error } = await (stripe as any).redirectToCheckout({ sessionId: data.id });
                 if (error) throw error;
             }

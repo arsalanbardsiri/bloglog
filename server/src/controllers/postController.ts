@@ -10,25 +10,31 @@ export const getPosts = async (req: Request, res: Response) => {
         const userId = req.user?.userId;
         const cacheKey = 'posts:all';
 
-        // Note: For a real high-scale app, we would cache the "content" and fetch votes separately/live.
-        // For this demo, we will invalidate cache on vote, but we need to handle "myVote" per user.
-        // So we will fetch posts from DB to get fresh votes/score.
+        let posts = [];
+        const cachedPosts = await redis.get(cacheKey);
 
-        const posts = await prisma.post.findMany({
-            where: { published: true },
-            include: {
-                author: { select: { username: true } },
-                votes: true,
-                _count: { select: { comments: true } }
-            },
-            orderBy: { createdAt: 'desc' }
-        });
+        if (cachedPosts) {
+            posts = JSON.parse(cachedPosts);
+        } else {
+            posts = await prisma.post.findMany({
+                where: { published: true },
+                include: {
+                    author: { select: { username: true } },
+                    votes: true,
+                    _count: { select: { comments: true } }
+                },
+                orderBy: { createdAt: 'desc' }
+            });
 
-        const postsWithScore = posts.map(post => {
-            const score = post.votes.reduce((acc, vote) => acc + vote.value, 0);
-            const userVote = userId ? post.votes.find(v => v.userId === userId)?.value : undefined;
+            // Cache for 60 seconds
+            await redis.setex(cacheKey, 60, JSON.stringify(posts));
+        }
+
+        const postsWithScore = posts.map((post: any) => {
+            const score = post.votes.reduce((acc: any, vote: any) => acc + vote.value, 0);
+            const userVote = userId ? post.votes.find((v: any) => v.userId === userId)?.value : undefined;
             const { votes, _count, ...postData } = post; // Remove raw votes array from response
-            return { ...postData, score, userVote, commentCount: _count.comments };
+            return { ...postData, score, userVote, commentCount: _count?.comments || post.commentCount };
         });
 
         res.json(postsWithScore);

@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Pin } from "lucide-react";
+import { useRef } from "react";
 
 interface StickyNoteProps {
     title: string;
@@ -12,6 +13,9 @@ interface StickyNoteProps {
     color?: "yellow" | "blue" | "green" | "pink";
     rotation?: number;
     onClick?: () => void;
+    onDragEnd?: (e: MouseEvent | TouchEvent | PointerEvent, info: { offset: { x: number; y: number } }) => void;
+    defaultPosition?: { x: number; y: number };
+    draggable?: boolean;
 }
 
 const colors = {
@@ -28,18 +32,50 @@ export function StickyNote({
     date,
     color = "yellow",
     rotation = 0,
-    onClick
+    onClick,
+    onDragEnd,
+    defaultPosition = { x: 0, y: 0 },
+    draggable = false
 }: StickyNoteProps) {
+    const isDragging = useRef(false);
+
+    const handleDragStart = () => {
+        isDragging.current = true;
+    };
+
+    const handleDragEnd = (e: MouseEvent | TouchEvent | PointerEvent, info: { offset: { x: number; y: number } }) => {
+        if (onDragEnd) {
+            onDragEnd(e, info);
+        }
+        // Small delay to prevent click from firing immediately after drag
+        setTimeout(() => {
+            isDragging.current = false;
+        }, 200);
+    };
+
+    const handleClick = () => {
+        if (!isDragging.current && onClick) {
+            onClick();
+        }
+    };
+
     return (
         <motion.div
-            whileHover={{ scale: 1.05, rotate: 0, zIndex: 10 }}
+            drag={draggable}
+            dragConstraints={draggable ? { left: -500, right: 500, top: -500, bottom: 500 } : undefined}
+            dragElastic={0.1}
+            dragMomentum={false}
+            whileHover={{ scale: 1.05, zIndex: 50, cursor: draggable ? "grab" : "pointer" }}
+            whileDrag={{ scale: 1.1, zIndex: 100, cursor: "grabbing" }}
             whileTap={{ scale: 0.95 }}
-            initial={{ rotate: rotation }}
-            onClick={onClick}
+            initial={{ rotate: rotation, x: defaultPosition.x, y: defaultPosition.y }}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onClick={handleClick}
             className={cn(
-                "relative w-64 h-64 p-6 shadow-lg cursor-pointer flex flex-col justify-between transition-shadow hover:shadow-xl",
+                "relative w-64 h-64 p-6 shadow-lg flex flex-col justify-between transition-shadow hover:shadow-xl",
                 colors[color],
-                "font-handwriting" // Using our custom font class
+                "font-handwriting"
             )}
             style={{
                 boxShadow: "5px 5px 15px rgba(0,0,0,0.15)"

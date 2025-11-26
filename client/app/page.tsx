@@ -30,8 +30,8 @@ export default function Home() {
         </h1>
 
         <p className="mx-auto max-w-2xl text-lg text-stone-600 sm:text-xl font-typewriter leading-relaxed">
-          "Experience a high-scale blogging platform built with modern engineering principles.
-          Featuring Redis caching, rate limiting, and a distributed microservices architecture."
+          &quot;Experience a high-scale blogging platform built with modern engineering principles.
+          Featuring Redis caching, rate limiting, and a distributed microservices architecture.&quot;
         </p>
 
         <div className="flex flex-col items-center justify-center gap-4 sm:flex-row mt-8">

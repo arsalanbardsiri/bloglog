@@ -24,6 +24,26 @@ export default function DashboardPage() {
     const [posts, setPosts] = useState<Post[]>([]);
     const [loadingPosts, setLoadingPosts] = useState(true);
     const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+    const [notePositions, setNotePositions] = useState<Record<string, { x: number; y: number }>>({});
+
+    useEffect(() => {
+        const saved = localStorage.getItem("notePositions");
+        if (saved) {
+            setNotePositions(JSON.parse(saved));
+        }
+    }, []);
+
+    const handleDragEnd = (id: string, info: { offset: { x: number; y: number } }) => {
+        const current = notePositions[id] || { x: 0, y: 0 };
+        const newPos = {
+            x: current.x + info.offset.x,
+            y: current.y + info.offset.y
+        };
+
+        const updated = { ...notePositions, [id]: newPos };
+        setNotePositions(updated);
+        localStorage.setItem("notePositions", JSON.stringify(updated));
+    };
 
     useEffect(() => {
         if (!isLoading && !token) {
@@ -100,14 +120,17 @@ export default function DashboardPage() {
                     ) : posts.length > 0 ? (
                         <div className="grid gap-6 md:grid-cols-2">
                             {posts.map((post, index) => (
-                                <div key={post.id} className="flex justify-center">
+                                <div key={post.id} className="flex justify-center relative z-10">
                                     <StickyNote
                                         title={post.title}
                                         content={post.content}
                                         date={new Date(post.createdAt).toLocaleDateString()}
-                                        color={["yellow", "blue", "green", "pink"][index % 4] as any}
+                                        color={["yellow", "blue", "green", "pink"][index % 4] as "yellow" | "blue" | "green" | "pink"}
                                         rotation={Math.random() * 4 - 2}
                                         onClick={() => setSelectedPost(post)}
+                                        onDragEnd={(_, info) => handleDragEnd(post.id, info)}
+                                        defaultPosition={notePositions[post.id]}
+                                        draggable={true}
                                     />
                                 </div>
                             ))}
@@ -151,6 +174,7 @@ export default function DashboardPage() {
                     {/* Origami Decoration */}
                     <div className="relative h-0">
                         <div className="absolute -right-8 -bottom-8 w-32 h-32 z-10 pointer-events-none opacity-90 rotate-6">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 src="/assets/origami/plane.png"
                                 alt="Origami Plane"

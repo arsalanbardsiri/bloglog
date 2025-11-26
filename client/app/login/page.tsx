@@ -35,8 +35,12 @@ export default function LoginPage() {
             }
 
             login(data.token, data.user);
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError("An unknown error occurred");
+            }
         } finally {
             setIsLoading(false);
         }
@@ -131,6 +135,7 @@ export default function LoginPage() {
 
                 {/* Origami Decorations */}
                 <div className="absolute -bottom-12 -right-12 w-32 h-32 z-30 pointer-events-none opacity-90 rotate-12">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                         src="/assets/origami/boat.png"
                         alt="Origami Boat"
@@ -138,6 +143,7 @@ export default function LoginPage() {
                     />
                 </div>
                 <div className="absolute -top-16 -left-16 w-40 h-40 z-0 pointer-events-none opacity-80 -rotate-12">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                         src="/assets/origami/crane.png"
                         alt="Origami Crane"

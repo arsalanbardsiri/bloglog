@@ -26,6 +26,7 @@ export function NotebookLayout({ children }: NotebookLayoutProps) {
 
     useEffect(() => {
         setIsClient(true);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     if (!isClient) return null;
