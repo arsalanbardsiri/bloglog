@@ -13,7 +13,13 @@
 - **Persistence**: Your layout is saved automatically, so everything is exactly where you left it.
 - **Smart Interaction**: Dragging moves the note; clicking opens it. No more accidental opens!
 
-### 2. Community Feed (Explore)
+### 2. Developer-First Features 👩‍💻
+- **Markdown Support**: Write with full GFM support (tables, task lists, bold/italic).
+- **Code Highlighting**: Syntax highlighting for Python, JS, TS, and more directly on your sticky notes.
+- **Tagging System**: Organize your snippets with tags (e.g., `#react`, `#bug`).
+- **Chalkboard UI**: A beautiful, immersive "Chalkboard on Paper" aesthetic.
+
+### 3. Community Feed (Explore)
 - **Public Board**: View thoughts from the entire community.
 - **Voting**: Upvote or downvote posts to surface the best content.
 - **Search**: Instantly filter posts by title, content, or author.
