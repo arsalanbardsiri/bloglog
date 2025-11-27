@@ -22,7 +22,7 @@ export default function PricingPage() {
             // Generate a random idempotency key for this attempt
             const idempotencyKey = crypto.randomUUID();
 
-            const res = await fetch("http://localhost:4000/api/stripe/create-checkout-session", {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/stripe/create-checkout-session`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

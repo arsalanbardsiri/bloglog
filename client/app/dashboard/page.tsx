@@ -19,6 +19,7 @@ interface Post {
     createdAt: string;
     score: number;
     tags?: string[];
+    commentCount?: number;
 }
 
 export default function DashboardPage() {
@@ -79,7 +80,7 @@ export default function DashboardPage() {
         const fetchMyPosts = async () => {
             if (!token) return;
             try {
-                const res = await fetch(`http://localhost:4000/api/posts/me?page=${page}&limit=6`, {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts/me?page=${page}&limit=6`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 if (res.ok) {
@@ -95,6 +96,27 @@ export default function DashboardPage() {
 
         fetchMyPosts();
     }, [token, page]);
+
+    const handleDelete = async (postId: string) => {
+        if (!confirm("Are you sure you want to delete this note?")) return;
+
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts/${postId}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!res.ok) throw new Error("Failed to delete post");
+
+            // Optimistic update
+            setPosts((prev) => prev.filter((p) => p.id !== postId));
+        } catch (err) {
+            console.error("Error deleting post:", err);
+            alert("Failed to delete post");
+        }
+    };
 
     if (isLoading || !user) {
         return (
@@ -156,6 +178,9 @@ export default function DashboardPage() {
                                         defaultPosition={initialPositions[post.id]}
                                         draggable={true}
                                         dragConstraintsRef={containerRef}
+                                        commentCount={post.commentCount}
+                                        tags={post.tags}
+                                        onDelete={() => handleDelete(post.id)}
                                     />
                                 </div>
                             ))}

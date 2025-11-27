@@ -43,7 +43,7 @@ export default function ExplorePage() {
                     headers["Authorization"] = `Bearer ${token}`;
                 }
 
-                const res = await fetch(`http://localhost:4000/api/posts?sort=${sortBy}&page=${page}&limit=9`, { headers });
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts?sort=${sortBy}&page=${page}&limit=9`, { headers });
                 if (res.ok) {
                     const data = await res.json();
                     setPosts(data);
@@ -62,7 +62,7 @@ export default function ExplorePage() {
         if (!selectedPost || !token) return;
 
         try {
-            const res = await fetch(`http://localhost:4000/api/posts/${selectedPost.id}/vote`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts/${selectedPost.id}/vote`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

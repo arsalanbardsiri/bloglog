@@ -27,7 +27,7 @@ export function CommentsSection({ postId }: CommentsSectionProps) {
     useEffect(() => {
         const fetchComments = async () => {
             try {
-                const res = await fetch(`http://localhost:4000/api/posts/${postId}/comments`);
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts/${postId}/comments`);
                 if (res.ok) {
                     const data = await res.json();
                     setComments(data);
@@ -48,7 +48,7 @@ export function CommentsSection({ postId }: CommentsSectionProps) {
 
         setIsSubmitting(true);
         try {
-            const res = await fetch(`http://localhost:4000/api/posts/${postId}/comments`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts/${postId}/comments`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

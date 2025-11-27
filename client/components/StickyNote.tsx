@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { Pin } from "lucide-react";
+import { Pin, Trash2 } from "lucide-react";
 import { useRef } from "react";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 
@@ -20,6 +20,7 @@ interface StickyNoteProps {
     dragConstraintsRef?: React.RefObject<Element | null>;
     commentCount?: number;
     tags?: string[];
+    onDelete?: () => void;
 }
 
 const colors = {
@@ -42,7 +43,8 @@ export function StickyNote({
     draggable = false,
     dragConstraintsRef,
     commentCount = 0,
-    tags = []
+    tags = [],
+    onDelete
 }: StickyNoteProps) {
     const isDragging = useRef(false);
 
@@ -125,6 +127,18 @@ export function StickyNote({
                         <span>{commentCount}</span>
                         <span className="text-[10px] uppercase tracking-wider">notes</span>
                     </div>
+                )}
+                {onDelete && (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onDelete();
+                        }}
+                        className="p-1 hover:bg-red-500/10 rounded-full transition-colors group"
+                        title="Delete Note"
+                    >
+                        <Trash2 className="w-4 h-4 text-stone-400 group-hover:text-red-600" />
+                    </button>
                 )}
             </div>
         </motion.div>
