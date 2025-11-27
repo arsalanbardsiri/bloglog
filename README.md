@@ -12,6 +12,7 @@
 - **Drag & Drop**: Organize your thoughts by dragging sticky notes around your desk.
 - **Persistence**: Your layout is saved automatically, so everything is exactly where you left it.
 - **Smart Interaction**: Dragging moves the note; clicking opens it. No more accidental opens!
+- **Management**: Delete notes you no longer need with a single click (Trash Icon).
 
 ### 2. Developer-First Features 👩‍💻
 - **Markdown Support**: Write with full GFM support (tables, task lists, bold/italic).
@@ -25,7 +26,7 @@
 - **Search**: Instantly filter posts by title, content, or author.
 - **Performance**: Powered by Redis caching for blazing fast load times.
 
-### 3. Engineering Excellence
+### 4. Engineering Excellence
 - **Microservices Ready**: Architecture designed for scale.
 - **CI/CD**: Automated build pipeline with GitHub Actions.
 - **Testing**: End-to-End testing infrastructure with Playwright.
@@ -41,7 +42,7 @@ graph TD
     Client -->|REST API| Server["Express Backend (Render)"]
     
     subgraph "Data Layer"
-        Server -->|Read/Write| DB[(PostgreSQL)]
+        Server -->|Read/Write| DB[(PostgreSQL - Neon)]
         Server -->|Cache-Aside| Redis["Redis Cache (Upstash)"]
     end
     
@@ -72,8 +73,9 @@ Middleware to prevent "Double Charge" issues in payment processing.
 
 - **Frontend**: Next.js 14 (App Router), Tailwind CSS, Framer Motion.
 - **Backend**: Node.js, Express, TypeScript.
-- **Database**: PostgreSQL (via Prisma ORM).
-- **Infrastructure**: Docker, Docker Compose, GitHub Actions.
+- **Database**: PostgreSQL (Neon.tech) via Prisma ORM.
+- **Cache**: Redis (Upstash).
+- **Infrastructure**: Vercel (Frontend), Render (Backend).
 - **Testing**: Playwright (E2E).
 
 ## 🚀 Getting Started
@@ -104,6 +106,7 @@ Middleware to prevent "Double Charge" issues in payment processing.
 3.  **Environment Setup**
     - Copy `.env.example` to `.env` in both `client` and `server` directories.
     - Fill in your PostgreSQL and Redis credentials.
+    - **Note**: For production, use `NEXT_PUBLIC_API_URL` in client to point to your live backend.
 
 4.  **Run Locally**
     ```bash
