@@ -195,3 +195,38 @@ export const getMyPosts = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
+
+// Function to delete a post
+export const deletePost = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        // @ts-ignore
+        const userId = req.user?.userId;
+
+        const post = await prisma.post.findUnique({ where: { id } });
+
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        if (post.authorId !== userId) {
+            return res.status(403).json({ error: 'Not authorized to delete this post' });
+        }
+
+        // Delete related data first
+        await prisma.vote.deleteMany({ where: { postId: id } });
+        await prisma.comment.deleteMany({ where: { postId: id } });
+        await prisma.post.delete({ where: { id } });
+
+        // Invalidate cache
+        const keys = await redis.keys('posts:*');
+        if (keys.length > 0) {
+            await redis.del(...keys);
+        }
+
+        res.json({ message: 'Post deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting post:', error);
+        res.status(500).json({ error: 'Failed to delete post' });
+    }
+};
