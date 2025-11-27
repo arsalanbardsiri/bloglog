@@ -1,44 +1,16 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
-// Create a reusable transporter object using the default SMTP transport
-const getTransporter = async () => {
-    // Check if we have production credentials
-    if (process.env.EMAIL_HOST && process.env.EMAIL_USER) {
-        return nodemailer.createTransport({
-            host: process.env.EMAIL_HOST,
-            port: parseInt(process.env.EMAIL_PORT || '587'),
-            secure: process.env.EMAIL_SECURE === 'true', // true for 465, false for other ports
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS,
-            },
-        });
-    }
-
-    // Fallback to Ethereal for development if no real credentials
-    console.log("⚠️ No Email Credentials found. Using Ethereal for testing.");
-    const testAccount = await nodemailer.createTestAccount();
-    return nodemailer.createTransport({
-        host: "smtp.ethereal.email",
-        port: 587,
-        secure: false,
-        auth: {
-            user: testAccount.user,
-            pass: testAccount.pass,
-        },
-    });
-};
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendWelcomeEmail = async (email: string, username: string) => {
     try {
-        const transporter = await getTransporter();
         const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+        const fromEmail = process.env.EMAIL_FROM || 'onboarding@resend.dev';
 
-        const info = await transporter.sendMail({
-            from: process.env.EMAIL_FROM || '"Blog Lounge" <no-reply@bloglounge.com>',
+        const data = await resend.emails.send({
+            from: fromEmail,
             to: email,
             subject: "Welcome to Blog Lounge! 🚀",
-            text: `Hi ${username},\n\nWelcome to Blog Lounge! We're excited to have you on board.\n\nBest,\nThe Team`,
             html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                     <h1 style="color: #4F46E5;">Welcome to Blog Lounge! 🚀</h1>
@@ -52,32 +24,24 @@ export const sendWelcomeEmail = async (email: string, username: string) => {
             `,
         });
 
-        console.log("Message sent: %s", info.messageId);
-
-        // Only log preview URL if using Ethereal (test account)
-        if (info.messageId && !process.env.EMAIL_HOST) {
-            console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
-        }
-
-        return info;
+        console.log("Welcome email sent:", data);
+        return data;
     } catch (error) {
-        console.error("Error sending email:", error);
-        // Don't throw error to avoid blocking registration if email fails
+        console.error("Error sending welcome email:", error);
         return null;
     }
 };
 
 export const sendPasswordResetEmail = async (email: string, token: string) => {
     try {
-        const transporter = await getTransporter();
         const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
         const resetUrl = `${clientUrl}/reset-password/${token}`;
+        const fromEmail = process.env.EMAIL_FROM || 'onboarding@resend.dev';
 
-        const info = await transporter.sendMail({
-            from: process.env.EMAIL_FROM || '"Blog Lounge" <no-reply@bloglounge.com>',
+        const data = await resend.emails.send({
+            from: fromEmail,
             to: email,
             subject: "Reset Your Password 🔐",
-            text: `You requested a password reset. Click here to reset it: ${resetUrl}`,
             html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                     <h1 style="color: #4F46E5;">Reset Your Password 🔐</h1>
@@ -92,13 +56,8 @@ export const sendPasswordResetEmail = async (email: string, token: string) => {
             `,
         });
 
-        console.log("Reset email sent: %s", info.messageId);
-
-        if (info.messageId && !process.env.EMAIL_HOST) {
-            console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
-        }
-
-        return info;
+        console.log("Reset email sent:", data);
+        return data;
     } catch (error) {
         console.error("Error sending reset email:", error);
         return null;
