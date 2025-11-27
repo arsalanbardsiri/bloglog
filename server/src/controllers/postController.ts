@@ -77,10 +77,12 @@ export const votePost = async (req: Request, res: Response) => {
 
         if (existingVote && existingVote.value === value) {
             // Toggle off (delete vote)
+            // Use deleteMany to avoid "Record to delete does not exist" error if double-clicked (race condition)
             await prisma.$transaction([
-                prisma.vote.delete({
+                prisma.vote.deleteMany({
                     where: {
-                        userId_postId: { userId, postId: id }
+                        userId,
+                        postId: id
                     }
                 }),
                 prisma.post.update({
