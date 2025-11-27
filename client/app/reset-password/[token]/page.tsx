@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { motion } from 'framer-motion';
 
 export default function ResetPasswordPage({ params }: { params: { token: string } }) {
@@ -48,6 +47,7 @@ export default function ResetPasswordPage({ params }: { params: { token: string 
                 setMessage(data.error || 'Invalid or expired token');
             }
         } catch (error) {
+            console.error(error);
             setStatus('error');
             setMessage('Failed to connect to server');
         }

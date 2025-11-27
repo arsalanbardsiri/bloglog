@@ -31,6 +31,7 @@ export default function ForgotPasswordPage() {
                 setMessage(data.error || 'Something went wrong');
             }
         } catch (error) {
+            console.error(error);
             setStatus('error');
             setMessage('Failed to connect to server');
         }
