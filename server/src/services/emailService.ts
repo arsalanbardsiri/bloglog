@@ -66,3 +66,41 @@ export const sendWelcomeEmail = async (email: string, username: string) => {
         return null;
     }
 };
+
+export const sendPasswordResetEmail = async (email: string, token: string) => {
+    try {
+        const transporter = await getTransporter();
+        const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+        const resetUrl = `${clientUrl}/reset-password/${token}`;
+
+        const info = await transporter.sendMail({
+            from: process.env.EMAIL_FROM || '"Blog Lounge" <no-reply@bloglounge.com>',
+            to: email,
+            subject: "Reset Your Password 🔐",
+            text: `You requested a password reset. Click here to reset it: ${resetUrl}`,
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h1 style="color: #4F46E5;">Reset Your Password 🔐</h1>
+                    <p>You requested a password reset for your Blog Lounge account.</p>
+                    <p>Click the button below to set a new password. This link expires in 1 hour.</p>
+                    <br/>
+                    <a href="${resetUrl}" style="background-color: #4F46E5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Reset Password</a>
+                    <br/><br/>
+                    <p>If you didn't request this, please ignore this email.</p>
+                    <p>Best,<br/>The Team</p>
+                </div>
+            `,
+        });
+
+        console.log("Reset email sent: %s", info.messageId);
+
+        if (info.messageId && !process.env.EMAIL_HOST) {
+            console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+        }
+
+        return info;
+    } catch (error) {
+        console.error("Error sending reset email:", error);
+        return null;
+    }
+};

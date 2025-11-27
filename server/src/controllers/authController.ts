@@ -1,8 +1,10 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import prisma from '../config/prisma';
 import { z } from 'zod';
+import { sendWelcomeEmail, sendPasswordResetEmail } from '../services/emailService';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key-change-in-prod';
 
