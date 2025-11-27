@@ -64,27 +64,26 @@ Custom middleware using Redis to track request counts per IP.
 - **Limit**: 100 requests / 15 minutes.
 - **Why**: Protects the API from abuse and ensures fair usage in a distributed environment.
 
-### 3. Idempotency (Safe Payments)
-Middleware to prevent "Double Charge" issues in payment processing.
-- **Mechanism**: Clients send a unique `Idempotency-Key` header.
-- **Logic**: Server caches the response of successful requests in Redis. If the same key is received, the cached response is returned immediately without re-processing the payment.
+## 🚀 Features
+
+-   **Authentication**: Secure JWT-based auth with **Forgot Password** flow.
+-   **Modern UI**: "Paper & Ink" aesthetic with sticky notes, index cards, and smooth animations.
+-   **Rich Text**: Markdown support with code syntax highlighting.
+-   **Interaction**: Upvote/Downvote system (Reddit-style) and threaded comments.
+-   **Performance**: Redis caching for high-speed post retrieval.
+-   **Email**: Transactional emails (Welcome, Password Reset) powered by **Resend**.
+-   **Responsive**: Fully optimized for mobile and desktop.
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: Next.js 14 (App Router), Tailwind CSS, Framer Motion.
-- **Backend**: Node.js, Express, TypeScript.
-- **Database**: PostgreSQL (Neon.tech) via Prisma ORM.
-- **Cache**: Redis (Upstash).
-- **Infrastructure**: Vercel (Frontend), Render (Backend).
-- **Testing**: Playwright (E2E).
+-   **Frontend**: Next.js 15 (App Router), TailwindCSS, Framer Motion, Lucide Icons.
+-   **Backend**: Node.js, Express, TypeScript.
+-   **Database**: PostgreSQL (Neon.tech), Prisma ORM.
+-   **Caching**: Redis (Upstash).
+-   **Email**: Resend API.
+-   **Deployment**: Vercel (Frontend), Render (Backend).
 
-## 🚀 Getting Started
-
-### Prerequisites
-- Node.js 20+
-- Docker (optional, for local DB/Redis)
-
-### Installation
+## 📦 Installation
 
 1.  **Clone the repository**
     ```bash
@@ -104,17 +103,37 @@ Middleware to prevent "Double Charge" issues in payment processing.
     ```
 
 3.  **Environment Setup**
-    - Copy `.env.example` to `.env` in both `client` and `server` directories.
-    - Fill in your PostgreSQL and Redis credentials.
-    - **Note**: For production, use `NEXT_PUBLIC_API_URL` in client to point to your live backend.
+    Create `.env` files in both `client` and `server` directories.
+
+    **Server (`server/.env`)**
+    ```env
+    PORT=5000
+    DATABASE_URL="postgresql://user:pass@host/db?sslmode=require"
+    JWT_SECRET="your_super_secret_key"
+    CLIENT_URL="http://localhost:3000"
+    
+    # Redis (Upstash)
+    REDIS_URL="redis://default:pass@host:port"
+
+    # Email (Resend)
+    RESEND_API_KEY="re_123456789"
+    EMAIL_FROM="Blog Lounge <hello@yourdomain.com>"
+    ```
+
+    **Client (`client/.env.local`)**
+    ```env
+    NEXT_PUBLIC_API_URL="http://localhost:5000"
+    ```
 
 4.  **Run Locally**
     ```bash
-    # Start Backend
+    # Terminal 1 (Server)
     cd server
+    npx prisma generate
+    npx prisma db push
     npm run dev
 
-    # Start Frontend
+    # Terminal 2 (Client)
     cd client
     npm run dev
     ```
