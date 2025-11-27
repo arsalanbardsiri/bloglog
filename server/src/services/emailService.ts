@@ -43,16 +43,40 @@ export const sendPasswordResetEmail = async (email: string, token: string) => {
             to: email,
             subject: "Reset Your Password 🔐",
             html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <h1 style="color: #4F46E5;">Reset Your Password 🔐</h1>
-                    <p>You requested a password reset for your Blog Lounge account.</p>
-                    <p>Click the button below to set a new password. This link expires in 1 hour.</p>
-                    <br/>
-                    <a href="${resetUrl}" style="background-color: #4F46E5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Reset Password</a>
-                    <br/><br/>
-                    <p>If you didn't request this, please ignore this email.</p>
-                    <p>Best,<br/>The Team</p>
-                </div>
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body { font-family: 'Courier New', Courier, monospace; background-color: #f4f4f4; padding: 20px; }
+                        .container { max-width: 600px; margin: 0 auto; background-color: #fdfbf7; padding: 40px; border: 1px solid #e5e7eb; box-shadow: 5px 5px 0px rgba(0,0,0,0.1); }
+                        .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 30px; }
+                        .title { font-size: 24px; font-weight: bold; color: #1f2937; text-transform: uppercase; letter-spacing: 2px; }
+                        .content { color: #4b5563; line-height: 1.6; font-size: 16px; }
+                        .button { display: inline-block; background-color: #1f2937; color: #ffffff !important; padding: 12px 24px; text-decoration: none; font-weight: bold; margin-top: 20px; border: 2px solid #000; text-transform: uppercase; letter-spacing: 1px; }
+                        .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 20px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <div class="title">Blog Lounge</div>
+                        </div>
+                        <div class="content">
+                            <p>Hello,</p>
+                            <p>We received a request to reset the password for your account.</p>
+                            <p>If you made this request, please click the button below to securely reset your password:</p>
+                            <div style="text-align: center;">
+                                <a href="${resetUrl}" class="button">Reset Password</a>
+                            </div>
+                            <p>This link will expire in 1 hour.</p>
+                            <p>If you didn't request this, you can safely ignore this email.</p>
+                        </div>
+                        <div class="footer">
+                            <p>&copy; ${new Date().getFullYear()} Blog Lounge. All rights reserved.</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
             `,
         });
 
