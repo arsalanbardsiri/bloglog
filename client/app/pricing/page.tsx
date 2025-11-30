@@ -7,10 +7,10 @@ import { cn } from "@/lib/utils";
 import { loadStripe } from "@stripe/stripe-js";
 
 const features = [
-    "Access to all premium system design articles",
-    "Weekly deep-dive newsletters",
-    "Source code access for all projects",
-    "Priority support & community access",
+    "Support the infrastructure 🏗️",
+    "Keep the project alive ❤️",
+    "Good karma points ✨",
+    "Virtual high-five ✋",
 ];
 
 export default function PricingPage() {
