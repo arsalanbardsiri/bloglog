@@ -28,6 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         const storedToken = localStorage.getItem("token");
         if (storedToken) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setToken(storedToken);
             // Fetch user info
             fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, {
