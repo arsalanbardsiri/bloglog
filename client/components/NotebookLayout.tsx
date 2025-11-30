@@ -15,7 +15,7 @@ interface NotebookLayoutProps {
 const tabs = [
     { name: "Home", href: "/", icon: Home, color: "bg-red-400" },
     { name: "Explore", href: "/explore", icon: Compass, color: "bg-blue-400" },
-    { name: "Pricing", href: "/pricing", icon: CreditCard, color: "bg-green-400" },
+    { name: "Support", href: "/pricing", icon: CreditCard, color: "bg-green-400" },
     { name: "About", href: "/about", icon: Info, color: "bg-yellow-400" },
 ];
 
