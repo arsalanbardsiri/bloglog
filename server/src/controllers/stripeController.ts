@@ -15,10 +15,10 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
                     price_data: {
                         currency: 'usd',
                         product_data: {
-                            name: 'Blog Lounge Premium',
-                            description: 'Access to exclusive system design content',
+                            name: 'Developer Support',
+                            description: 'One-time contribution to support infrastructure',
                         },
-                        unit_amount: 1000, // $10.00
+                        unit_amount: 100, // $1.00
                     },
                     quantity: 1,
                 },

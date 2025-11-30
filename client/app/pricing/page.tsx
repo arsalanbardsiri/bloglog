@@ -65,13 +65,13 @@ export default function PricingPage() {
             >
                 {/* Receipt Header */}
                 <div className="mb-8 text-center border-b-2 border-dashed border-stone-300 pb-6">
-                    <h2 className="mb-2 text-3xl font-handwriting font-bold text-stone-800">INVOICE</h2>
-                    <p className="text-stone-500 font-mono text-sm">RECEIPT #001-PREMIUM</p>
+                    <h2 className="mb-2 text-3xl font-handwriting font-bold text-stone-800">CONTRIBUTION</h2>
+                    <p className="text-stone-500 font-mono text-sm">RECEIPT #001-SUPPORT</p>
                 </div>
 
                 <div className="mb-8 flex items-baseline justify-center gap-1 font-mono">
-                    <span className="text-5xl font-bold text-stone-800">$10</span>
-                    <span className="text-stone-500">/month</span>
+                    <span className="text-5xl font-bold text-stone-800">$1</span>
+                    <span className="text-stone-500">one-time</span>
                 </div>
 
                 <ul className="mb-8 space-y-4 font-serif">
