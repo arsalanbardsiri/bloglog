@@ -27,7 +27,7 @@ export const getPosts = async (req: Request, res: Response) => {
             where: { published: true },
             include: {
                 author: { select: { username: true } },
-                votes: true,
+                votes: { where: { userId: userId || '0' } }, // Only fetch current user's vote
                 _count: { select: { comments: true } }
             },
             orderBy: orderBy as any,
@@ -36,7 +36,7 @@ export const getPosts = async (req: Request, res: Response) => {
         });
 
         const postsWithScore = posts.map((post: any) => {
-            const userVote = userId ? post.votes.find((v: any) => v.userId === userId)?.value : undefined;
+            const userVote = post.votes[0]?.value; // Since we filtered by userId, there's at most 1 vote
             const { votes, _count, ...postData } = post;
             return { ...postData, userVote, commentCount: _count?.comments || post.commentCount };
         });
